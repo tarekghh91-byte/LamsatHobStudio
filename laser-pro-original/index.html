@@ -115,7 +115,7 @@
  <div class="sidebottom"><b>● يعمل دون إنترنت</b><br>البيانات محفوظة على الجهاز وتتزامن مع السحابة بعد الربط والاتصال بالإنترنت.<br>صدّر نسخة احتياطية بانتظام.</div>
 </aside>
 <main class="main">
- <header class="topbar"><div><h1 id="pageTitle">لوحة التحكم</h1><div class="subtitle">نظام إدارة Laser Pro المعتمد — طلباتك، مصاريفك، ومزامنة أجهزتك</div></div><div class="theme-controls"><button type="button" class="theme-choice theme-shortcut" data-theme-toggle aria-label="التغيير إلى المظهر الداكن">☾ داكن</button><div class="today" id="today"></div></div></header>
+ <header class="topbar"><div><h1 id="pageTitle">لوحة التحكم</h1><div class="subtitle">نظام إدارة Laser Pro المعتمد — طلباتك، مصاريفك، ومزامنة أجهزتك</div></div><div class="theme-controls"><button type="button" class="theme-choice theme-shortcut" data-theme-toggle aria-label="التغيير إلى المظهر الداكن">☾ داكن</button><button type="button" class="theme-choice theme-shortcut" data-page="settings" aria-label="إعدادات المزامنة">☁ الحساب</button><div class="today" id="today"></div></div></header>
  <section class="page active" id="page-dashboard">
   <div class="hero"><div><h2>أهلاً في Laser Pro Manager ✦</h2><p>تابع الطلبات، الأسعار، الزبائن، والمبالغ المدفوعة، وخلي كل تفاصيل مشروعك مرتّبة على اللابتوب أو الموبايل.</p></div><button class="button gold" data-action="new-order">＋ تسجيل طلب جديد</button></div>
   <div class="dash-actions" aria-label="العمليات اليومية">
@@ -244,7 +244,7 @@
   </div>
   <div class="panel" style="margin-top:17px"><div class="panelhead"><h3>إعدادات الوقت والفواتير</h3></div><div class="panelpad"><form id="businessForm" class="settings-grid"><div class="field"><label for="hourlyRate">قيمة ساعة شغلك ($) — اقتراح مبدئي 2$، عدّله حسب تعبك</label><input id="hourlyRate" type="number" step="0.01" min="0" /></div><div class="field"><label for="brandName">اسم المتجر على الفاتورة</label><input id="brandName" maxlength="90" /></div><div class="field"><label for="brandPhone">رقم التواصل</label><input id="brandPhone" maxlength="65" dir="ltr" /></div><div class="field"><label for="brandInstagram">حساب إنستغرام</label><input id="brandInstagram" maxlength="90" dir="ltr" /></div><div class="field full"><label for="invoiceFooter">رسالة آخر الفاتورة</label><input id="invoiceFooter" maxlength="200" /></div><div class="field full"><button class="button" type="submit">حفظ إعدادات العمل والفواتير</button></div></form><p class="hint">الفاتورة إيصال تجاري عادي، وليست فاتورة ضريبية.</p></div></div>
   <div class="panel" style="margin-top:17px"><div class="panelhead"><h3>الربط السحابي بين اللابتوب والموبايل</h3><span class="badge" id="cloudStatus">غير مربوط</span></div><div class="panelpad">
-<div class="hintbox">أولاً: اعمل نسخة JSON من جهازك الأساسي، وبعدها أنشئ مشروع Supabase وجدول البيانات بحسب دليل التثبيت. استخدم نفس حساب الدخول على الجهازين. <b>لا تضع Secret Key أو Service Role هنا إطلاقاً.</b></div>
+<div class="hintbox">البرنامج مربوط بمشروع Laser Pro السحابي. سجّل الدخول بنفس الحساب اللي استعملته على تلفونك، وبعدها بتنتقل البيانات بين التلفون واللابتوب عند الاتصال. خذ نسخة JSON دورياً. <b>لا تشارك كلمة السر مع أي حدا.</b></div>
 <div class="settings-grid" style="margin:12px 0">
 <div class="field full"><label for="cloudUrl">Supabase Project URL</label><input id="cloudUrl" type="url" dir="ltr" placeholder="https://example.supabase.co" autocomplete="off" /></div>
 <div class="field full"><label for="cloudKey">Publishable key (sb_publishable_...)</label><input id="cloudKey" type="text" dir="ltr" placeholder="sb_publishable_..." autocomplete="off" /></div>
@@ -762,6 +762,12 @@ $('#recipeProduct').addEventListener('change',suggestRecipeAmount);
 const CLOUD_CFG_KEY='LaserPro_Cloud_Config_v12',CLOUD_TOKEN_KEY='LaserPro_Cloud_Token_v12';
 let cloudConfig={},cloudToken=null,cloudBusy=false,cloudTimer=null,lastCloudSync='';
 try{cloudConfig=JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'{}')||{};cloudToken=JSON.parse(localStorage.getItem(CLOUD_TOKEN_KEY)||'null')}catch(e){cloudConfig={};cloudToken=null}
+// Published app uses the user's Laser Pro Supabase account by default.
+// A pre-existing custom server is never overwritten.
+if(!cloudConfig.url&&!cloudConfig.key){
+ cloudConfig={url:'https://cdzpaeygafjgfhhjvugt.supabase.co',key:'sb_publishable_nkn2b--D6qmAIqewh0axKg_2hjNw2hO'};
+ try{localStorage.setItem(CLOUD_CFG_KEY,JSON.stringify(cloudConfig))}catch(e){}
+}
 if(cloudToken?.user?.id&&cloudConfig.url&&!localStorage.getItem('LaserPro_Manager_Cloud_Owner_v2')){localStorage.setItem('LaserPro_Manager_Cloud_Owner_v2',cloudToken.user.id+'@'+new URL(cloudConfig.url).host)}
 function cloudStatus(s){lastCloudSync=s;updateCloudUI()}
 function updateCloudUI(){let badge=$('#cloudStatus'),msg=$('#cloudLastSync');if(!badge)return;
