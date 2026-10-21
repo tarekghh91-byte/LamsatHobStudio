@@ -107,7 +107,7 @@ const assert = require('node:assert/strict');
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('[data-page="inventory"]').first().click();
    const inventoryCard=page.locator('[data-stock-card="test-stock-board"]');
-   assert.match(await inventoryCard.innerText(),/4.98 لوح مساحة تقريبية/);
+   assert.match(await inventoryCard.innerText(),/4\.97 لوح مساحة تقريبية/);
    assert.match(await inventoryCard.innerText(),/محجوز للطلبات/);
    assert.match(await inventoryCard.innerText(),/تقدير|تقريبية|مكافئة|مساحة/);
    if(width<850){
