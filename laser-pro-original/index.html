@@ -502,6 +502,57 @@ function syncOrderMaterialsFromEditor(o){
  }
  o.useWoodFromStock=Array.from(chosen.values()).some(x=>itemCategory(x.stock)==='خشب');touch(o);
 }
+// Multiple measured cuts from one stock wood sheet (manual orders).
+const baseMaterialPicker=renderOrderMaterialPicker;
+renderOrderMaterialPicker=function(order){
+ baseMaterialPicker(order);
+ for(const row of materialRows()){
+  const mat=stocks().find(s=>s.id===row.dataset.sid);
+  if(!mat||itemCategory(mat)!=='خشب'||!/لوح/i.test(mat.unit||''))continue;
+  const past=order?.id?orderUses(order).find(u=>u.stockId===mat.id&&!u.autoWood):null;
+  row.dataset.woodCuts='true';
+  row.insertAdjacentHTML('beforeend',`<div class="wood-cuts-form"><b>قصّات هاللوح (سم)</b>
+  <div class="wood-cuts-rows"></div>
+  <button class="button secondary sm" type="button" data-add-cut>＋ إضافة مقاس ثاني</button>
+  <span class="small muted">أدخل عرض وطول وعدد كل قصّة. رح ينحسب جزء اللوح والسعر تلقائياً.</span></div>`);
+  const cuts=past?.cutPieces?.length?past.cutPieces:[{w:'',h:'',count:1}];
+  for(const c of cuts)addWoodCutInput(row,c);
+  row.querySelector('[data-add-cut]').onclick=()=>{addWoodCutInput(row,{w:'',h:'',count:1});updateWoodCutQuantity(row)};
+  row.querySelector('.material-qty').readOnly=true;
+  updateWoodCutQuantity(row);
+ }
+};
+function addWoodCutInput(row,cut){
+ const box=document.createElement('div');box.className='wood-cut-entry';
+ box.innerHTML=`<label>عرض<input class="wood-w" type="number" min="0.1" step=".1" value="${esc(cut.w||'')}"></label>
+ <label>طول<input class="wood-h" type="number" min="0.1" step=".1" value="${esc(cut.h||'')}"></label>
+ <label>عدد<input class="wood-count" type="number" min="1" step="1" value="${esc(cut.count||1)}"></label>
+ <button type="button" class="linkbutton" data-del-cut>×</button>`;
+ row.querySelector('.wood-cuts-rows').append(box);
+ box.querySelectorAll('input').forEach(e=>e.oninput=()=>updateWoodCutQuantity(row));
+ box.querySelector('[data-del-cut]').onclick=()=>{box.remove();updateWoodCutQuantity(row)};
+}
+function woodCutsOfRow(row){return [...row.querySelectorAll('.wood-cut-entry')].map(el=>({
+ w:Number(el.querySelector('.wood-w').value),h:Number(el.querySelector('.wood-h').value),count:Number(el.querySelector('.wood-count').value)}))}
+function updateWoodCutQuantity(row){
+ const mat=stocks().find(s=>s.id===row.dataset.sid);if(!mat)return;
+ const area=n(mat.boardWidth)*n(mat.boardHeight),gap=n(mat.kerfMm)/10,cuts=woodCutsOfRow(row);
+ const valid=area>0&&cuts.length>0&&cuts.every(c=>c.w>0&&c.h>0&&Number.isInteger(c.count)&&c.count>0);
+ row.querySelector('.material-qty').value=valid?(cuts.reduce((t,c)=>t+(c.w+gap)*(c.h+gap)*c.count,0)/area).toFixed(6):'0';
+ updatePickerTotals();orderSummary();
+}
+function getManualCuts(row){
+ if(!row.dataset.woodCuts)return null;
+ const cuts=woodCutsOfRow(row);
+ if(!cuts.length||cuts.some(c=>!(c.w>0&&c.h>0&&Number.isInteger(c.count)&&c.count>0)))
+  throw Error('لازم عرض وطول وعدد كل قصّة خشب: '+stocks().find(x=>x.id===row.dataset.sid)?.name);
+ return cuts;
+}
+const baseRecalculateMaterialQty=recalculateMaterialQty;
+recalculateMaterialQty=function(){
+ baseRecalculateMaterialQty();
+ for(const row of materialRows())if(row.dataset.woodCuts)updateWoodCutQuantity(row);
+};
 function openOrderMaterialShortcut(){const o=orderOfCosting();if(!o)return alert('اختَر طلباً أولاً');openModal('order',o.id);const e=$('#orderMaterialPicker');if(e)e.scrollIntoView({block:'center',behavior:'smooth'})}
 function doSaveForm(e){e.preventDefault();try{
  if(mode==='order'){const customerName=getf('customerName');if(!customerName)throw Error('لازم اسم الزبون');let p=getProduct(getf('productId'));let old=editingId?db.orders.find(z=>z.id===editingId):null;if(!p&&!(old&&old.productId===getf('productId')))throw Error('اختر المنتج');const q=Number(getf('qty')),price=validateMoney(getf('price')),paid=validateMoney(getf('paid')),extra=validateMoney(getf('extraCost'));if(!Number.isInteger(q)||q<1||price===null||paid===null||extra===null)throw Error('راجع القيم الرقمية');if(paid>price*q)throw Error('المبلغ المدفوع أكبر من قيمة الطلب');const woodQuote=portraitQuoteFromEditor(),quickMinutesInput=Number(getf('quickMinutes')||0),quickRateInput=0,estimateMinutesInput=Number(getf('estimateMinutes')||0);if(!Number.isFinite(estimateMinutesInput)||estimateMinutesInput<0)throw Error('وقت التنفيذ التقديري غير صحيح');if(isPortraitProduct(p)&&(!(woodQuote.width>0)||!(woodQuote.height>0)))throw Error('حدد عرض وارتفاع الصورة لحساب الواجهة والخلفية بدقة.');
