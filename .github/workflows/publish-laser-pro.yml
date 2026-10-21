@@ -30,6 +30,8 @@ jobs:
           test -s _site/laser-pro-studio/index.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Upload web page
         uses: actions/upload-pages-artifact@v3
         with:
