@@ -47,7 +47,9 @@ jobs:
         run: |
           python3 -m http.server 8765 --directory _site > /tmp/laser-pro-web.log 2>&1 &
           sleep 2
+          node laser-pro-original/wood-layout.test.cjs
           node laser-pro-original/smoke.cjs
+          node laser-pro-original/wood-browser.cjs
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
