@@ -65,3 +65,20 @@ jobs:
       - name: Deploy live website
         id: deploy
         uses: actions/deploy-pages@v4
+
+      - name: Verify deployed Laser Pro Daily HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://tarekghh91-byte.github.io/LamsatHobStudio/laser-pro-daily/"
+          for i in 1 2 3 4 5 6; do
+            if curl -fL --max-time 25 -D /tmp/daily_headers "$URL" -o /tmp/daily_page; then
+              break
+            fi
+            sleep 4
+          done
+          grep -qi 'content-type: text/html' /tmp/daily_headers
+          grep -q '<!DOCTYPE html>' /tmp/daily_page
+          grep -q 'LASER PRO' /tmp/daily_page
+          grep -q 'lp_daily_record_payment' /tmp/daily_page
+          echo 'Published Laser Pro Daily is a rendered HTML page, not plain-text source'
