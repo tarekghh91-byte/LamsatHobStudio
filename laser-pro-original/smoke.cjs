@@ -87,6 +87,50 @@ const assert = require('node:assert/strict');
    const finance=await page.locator('#capitalBreakdown').innerText();
    assert.match(finance,/ربح الطلبات|خسائر الطلبات/);
    assert.match(finance,/مصاريف المحل/);
+   // Stock cards must be concise, honest about equivalent wood area and
+   // consistent with confirmed versus reserved physical inventory.
+   await page.evaluate(()=>{
+    const key='LaserPro_Manager_v1_local';
+    const db=JSON.parse(localStorage.getItem(key));
+    const order=db.orders.find(o=>o.customerName==='زبون تجربة الفاتورة');
+    db.stocks.push({id:'test-stock-board',name:'MDF خشب طبيعي اختبار',category:'خشب',unit:'لوح',
+      qty:5,unitCost:6,minimum:.2,boardWidth:80,boardHeight:120,supplier:'',
+      createdAt:Date.now(),updatedAt:Date.now(),deleted:false});
+    db.usages.push({id:'test-usage-consumed',orderId:order.id,stockId:'test-stock-board',
+      stockName:'MDF خشب طبيعي اختبار',role:'خشب',qty:.025,costPerUnit:6,
+      state:'consumed',createdAt:Date.now(),updatedAt:Date.now(),deleted:false});
+    db.usages.push({id:'test-usage-reserved',orderId:order.id,stockId:'test-stock-board',
+      stockName:'MDF خشب طبيعي اختبار',role:'خشب',qty:.01,costPerUnit:6,
+      state:'reserved',createdAt:Date.now(),updatedAt:Date.now(),deleted:false});
+    localStorage.setItem(key,JSON.stringify(db));
+   });
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.locator('[data-page="inventory"]').first().click();
+   const inventoryCard=page.locator('[data-stock-card="test-stock-board"]');
+   assert.match(await inventoryCard.innerText(),/4.98 لوح مساحة تقريبية/);
+   assert.match(await inventoryCard.innerText(),/محجوز للطلبات/);
+   assert.match(await inventoryCard.innerText(),/تقدير|تقريبية|مكافئة|مساحة/);
+   if(width<850){
+     assert.equal(await inventoryCard.isVisible(),true,'Mobile inventory is shown as compact cards');
+     assert.equal(await page.locator('.stock-classic-table').isVisible(),false,'Hide technical table on phone');
+   }else{
+     assert.equal(await inventoryCard.isVisible(),false,'Desktop shows editable detailed stock table');
+     assert.equal(await page.locator('.stock-classic-table').isVisible(),true);
+   }
+   await page.locator('[data-page="costing"]').first().click();
+   const confirmation=page.locator('[data-action="consume-order"]').first();
+   await confirmation.click();
+   let after=await page.evaluate(()=>{
+     const db=JSON.parse(localStorage.getItem('LaserPro_Manager_v1_local'));
+     return db.usages.find(u=>u.id==='test-usage-reserved')?.state;
+   });
+   assert.equal(after,'consumed','Explicit confirmation deducts pending material');
+   await page.locator('[data-action="consume-order"]').first().click();
+   after=await page.evaluate(()=>{
+     const db=JSON.parse(localStorage.getItem('LaserPro_Manager_v1_local'));
+     return db.usages.filter(u=>u.stockId==='test-stock-board'&&u.state==='consumed').length;
+   });
+   assert.equal(after,2,'Confirming twice does not deduct material twice');
    assert.ok(errors.length===0,'No browser errors: '+errors.join('; '));
    await page.close();
    console.log('Laser Pro classic pass at '+width+'px');
