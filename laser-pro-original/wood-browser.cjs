@@ -19,6 +19,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
    const firstCard=page.locator('[data-stock-card="wood-demo"]');
    // The new cards don't use a stock-specific attribute; match the title instead.
    await assert.doesNotReject(async()=>await page.getByText('5 ألواح كاملة').first().waitFor());
+   await page.locator('[data-page="dashboard"]').first().click();
    await page.locator('[data-action="new-order"]').first().click();
    await page.locator('#editor[open]').waitFor();
    await page.locator('#f_productId').selectOption('manual-cut-product');
