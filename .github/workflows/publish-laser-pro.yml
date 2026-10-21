@@ -1,0 +1,39 @@
+name: Publish Laser Pro Browser App
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'laser-pro-studio/**'
+      - '.github/workflows/publish-laser-pro.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: laser-pro-pages
+  cancel-in-progress: true
+jobs:
+  publish:
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare isolated site
+        shell: bash
+        run: |
+          mkdir -p _site/laser-pro-studio
+          cp laser-pro-studio/index.html _site/laser-pro-studio/index.html
+          touch _site/.nojekyll
+          test -s _site/laser-pro-studio/index.html
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload web page
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy live website
+        id: deploy
+        uses: actions/deploy-pages@v4
