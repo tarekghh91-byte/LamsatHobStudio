@@ -142,8 +142,9 @@
   <div class="sectionhead"><h2>مخزون المواد</h2><div class="actions"><button class="button secondary" data-action="csv-inventory">↓ تقرير CSV</button><button class="button" data-action="new-stock">＋ مادة جديدة</button></div></div>
   <div class="hintbox" style="margin-top:0">من هون بتعرف قديش باقي عندك من ألواح الخشب، الأكريليك، التعاليق، الغراء وأغراض التغليف. المتوفر الفعلي = رصيد البداية + المشتريات − المواد المستهلكة. المواد المحجوزة تظهر منفصلة لتجنّب نفادها أثناء تجهيز الطلب.</div>
   <div class="metrics" id="stockMetrics"></div>
+  <div class="stock-card-grid" id="stockCards" aria-live="polite"></div>
   <div class="tools"><input class="search" id="stockSearch" placeholder="بحث باسم المادة أو المورّد..."/><select class="search" id="stockFilter" style="width:auto;min-width:140px"><option value="all">كل المواد</option><option value="low">قاربت على النفاد</option></select></div>
-  <div class="panel tablewrap" id="stockTable"></div>
+  <div class="panel tablewrap stock-classic-table" id="stockTable"></div>
   <div class="hintbox">قيمة المخزون المتبقي تقديرية حسب سعر الشراء لكل وحدة. الوصفات تحجز المواد عند فتح الطلب. عند تأكيد الاستهلاك أو تسليم الطلب ينخفض الرصيد الفعلي، والإلغاء يحرر الحجوزات. المشتريات ليست مصروفاً تشغيلياً إضافياً على نفس القطعة.</div>
  </section>
  <section class="page" id="page-packaging">
@@ -772,9 +773,57 @@ const originalRenderCostDetails=renderCostDetailsLegacy;
 function renderCostDetails(){originalRenderCostDetails();let o=orderOfCosting();if(!o)return;const el=$('#costSummary'),e=estimateCost(o);el.insertAdjacentHTML('afterbegin',`<div class="hintbox"><b>الربح المتوقع قبل الإنجاز: ${money(e.profit)}</b> · التكلفة المتوقعة ${money(e.total)} · وقت باقي مقدّر ${money(e.expectedLabor)}. <span class="muted">الربح الفعلي بيتثبت بعد إنهاء التصنيع وتسجيل المواد وساعات العمل. ${o.finalSnapshot?(o.finalSnapshot.complete?'طلب مكتمل بتكلفته المسجلة.':'الطلب مسلّم لكن ساعات العمل أو بعض تكاليفه غير مؤكدة؛ سجّلها ثم ثبّت التكلفة من جديد.'):''}</span></div>`);const packing=orderUses(o).filter(u=>u.role==='تغليف'&&u.state!=='released');const note=portraitQuoteForOrder(o);if(isPortraitProduct(getProduct(o.productId))&&!o.costKnown&&!woodActual(o)){el.insertAdjacentHTML('afterbegin','<div class="notice">⚠ سعر الخشب غير مسجّل. الربح المعروض تقديري ناقص كلفة الخشب، ولا يُعتبر ربحاً نهائياً.</div>');}el.insertAdjacentHTML('beforeend',`<div class="hintbox"><b>تفصيل مواد التغليف المختارة:</b>${packing.length?packing.map(u=>`<div class="summaryline"><span>${esc(u.stockName)} × ${n(u.qty)} ${esc(stocks().find(s=>s.id===u.stockId)?.unit||'قطعة')}</span><b>${money(n(u.qty)*n(u.costPerUnit))}</b></div>`).join(''):'<p>لا توجد مواد تغليف لهذا الطلب بعد.</p>'}${isPortraitProduct(getProduct(o.productId))?`<p class="small">حساب الخشب: ${esc(note.description)} — يتم حساب وجه وخلفية بنفس المقاس وقاعدة؛ التكلفة وفق سعر اللوح ونسبة الهدر.</p>`:''}</div>`);}
 // The original V3 stock getter called availableStock; final stock keeps separately physical and reserved.
 const originalRenderInventory=renderInventoryLegacy;
-function renderInventory(){originalRenderInventory();const el=$('#stockMetrics');el.insertAdjacentHTML('beforeend',metric('كميات محجوزة',stocks().reduce((t,s)=>t+reservationsFor(s),0).toFixed(2),'محجوزة لطلبات لم تُستهلك بعد','◷'));}
+function renderInventory(){
+ originalRenderInventory();
+ const el=$('#stockMetrics');
+ const reservedKinds=stocks().filter(v=>reservationsFor(v)>0).length;
+ el.insertAdjacentHTML('beforeend',metric('أصناف عليها حجوزات',reservedKinds,'الحجوزات منفصلة عن الاستهلاك الفعلي','◷'));
+ const cards=$('#stockCards');if(!cards)return;
+ const q=$('#stockSearch').value.toLowerCase().trim(),filter=$('#stockFilter').value;
+ const all=stocks().filter(x=>(filter==='all'||isLowStock(x))&&
+ [x.name,x.supplier,x.category].join(' ').toLowerCase().includes(q))
+ .sort((a,b)=>Number(isLowStock(b))-Number(isLowStock(a))||a.name.localeCompare(b.name,'ar'));
+ cards.innerHTML=all.map(x=>{
+  const isSheet=itemCategory(x)==='خشب'&&/لوح/i.test(x.unit||'');
+  const kind=itemCategory(x),available=availableStock(x),reserved=reservationsFor(x);
+  const promised=available-reserved,price=effectiveStockUnitCost(x);
+  const size=(n(x.boardWidth)>0&&n(x.boardHeight)>0)?' • '+n(x.boardWidth)+'×'+n(x.boardHeight)+' سم':'';
+  const amountText=isSheet?available.toFixed(2)+' لوح مساحة تقريبية':available.toFixed(2)+' '+(x.unit||'قطعة');
+  const detail=isSheet?'اللوح'+size+' • سعر اللوح '+money(price):'سعر '+esc(x.unit||'الوحدة')+' '+money(price);
+  const note=isSheet?'اللوح المقصوص محسوب كمساحة مكافئة فقط، مش خريطة فعلية للبقايا.':'السعر محسوب من أسعار الشراء المسجلة.';
+  return '<article class="stock-item-card" data-stock-card="'+esc(x.id)+'">'+
+    '<div class="stock-item-title"><div><span class="stock-item-type">'+esc(kind)+'</span><h3>'+esc(x.name)+'</h3></div>'+
+    '<span class="type-chip '+(promised<=n(x.minimum)?'bad':'good')+'">'+(promised<=n(x.minimum)?'⚠ قليل':'متوفر')+'</span></div>'+
+    '<div class="stock-item-quantity">'+esc(amountText)+'</div>'+
+    '<div class="stock-item-info">'+detail+'</div>'+
+    (reserved>0?'<div class="stock-item-info">محجوز للطلبات: '+reserved.toFixed(3)+' '+esc(x.unit||'')+' • حر للطلبات: '+Math.max(0,promised).toFixed(3)+'</div>':'')+
+    '<div class="stock-item-actions"><span class="small muted">قيمة الباقي: '+money(Math.max(0,available)*price)+'</span>'+
+    '<button type="button" class="linkbutton" data-action="edit-stock" data-id="'+esc(x.id)+'">تعديل المادة</button></div>'+
+    (isSheet?'<div class="stock-item-note">'+esc(note)+'</div>':'')+
+    '</article>';
+ }).join('')||'<div class="hintbox">ما في مواد بهالتصفية بعد. أضف أول مادة وسعرها ووحدتها.</div>';
+}
 // Historical snapshots are never changed by later materials-price edits.
-function markOrderConsumed(id){const o=getOrder(id);if(!o)return;let nChange=0;for(let u of orderUses(o)){if(u.state==='reserved'){u.state='consumed';touch(u);nChange++}}if(nChange){save();render();toast('تم تأكيد الاستهلاك، وتحديث الرصيد الفعلي ✓')}else toast('المواد مسجلة كمستهلكة بالفعل أو ما في حجوزات');}
+function markOrderConsumed(id){
+ const o=getOrder(id);if(!o)return;
+ if(o.status==='ملغى')return alert('ما فيك تخصم مواد طلب ملغي. أعد فتح الطلب وغيّر حالته أولاً.');
+ const awaiting=orderUses(o).filter(u=>u.state==='reserved');
+ const need=new Map();
+ for(const u of awaiting)need.set(u.stockId,(need.get(u.stockId)||0)+n(u.qty));
+ const missing=[];
+ for(const [sid,qty]of need){
+  const stock=stocks().find(s=>s.id===sid);
+  if(!stock){missing.push('مادة انحذفت من المخزون');continue}
+  if(availableStock(stock)+1e-8<qty)missing.push(stock.name+' (المتاح '+availableStock(stock).toFixed(3)+', المطلوب '+qty.toFixed(3)+')');
+ }
+ if(missing.length)return alert('ما خصمنا شي حتى ما يصير رصيد سالب. راجع المواد:\n'+missing.join('\n'));
+ const original=awaiting.map(u=>({u,state:u.state,updatedAt:u.updatedAt}));
+ for(const u of awaiting){u.state='consumed';touch(u)}
+ if(awaiting.length){
+  if(!save()){for(const snap of original){snap.u.state=snap.state;snap.u.updatedAt=snap.updatedAt}return alert('تعذّر حفظ الاستهلاك، ما ثبتنا أي خصم. اعمل نسخة احتياطية وجرب بعد التأكد من التخزين.')}
+  render();toast('تم تأكيد الاستهلاك مرة واحدة ✓')
+ }else toast('المواد مسجلة كمستهلكة بالفعل أو ما في حجوزات');
+}
 function forceFinalCost(id){let o=getOrder(id);if(!o)return;if(o.status!=='تم التسليم')return alert('ثبّت تكلفة الطلب بعد وضع حالته «تم التسليم».');if(o.finalSnapshot&&!confirm('هيدا الطلب إله تكلفة مثبتة. بدك تعيد حسابها من السجلات الحالية؟'))return;for(const u of orderUses(o)){if(u.state==='reserved'){u.state='consumed';touch(u)}}o.finalSnapshot=null;finalizeOrderCost(o);save();render();toast('تم تثبيت التكلفة النهائية ✓')}
 function quickTimer(id){if(!getOrder(id))return;changePage('work');$('#timerOrder').value=id;$('#timerStage').value='حفر';if(readTimer())toast('في مؤقّت شغال مسبقاً');else toast('اختر مرحلة الشغل واضغط ابدأ التوقيت')}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,id=b.dataset.id;if(a==='consume-order')markOrderConsumed(id);if(a==='finalize-order')forceFinalCost(id);if(a==='quick-open-order')openModal('order',id);if(a==='quick-timer')quickTimer(id)});
