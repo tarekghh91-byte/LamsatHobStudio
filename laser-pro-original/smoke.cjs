@@ -107,30 +107,28 @@ const assert = require('node:assert/strict');
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('[data-page="inventory"]').first().click();
    const inventoryCard=page.locator('[data-stock-card="test-stock-board"]');
-   assert.match(await inventoryCard.innerText(),/4\.97 لوح مساحة تقريبية/);
-   assert.match(await inventoryCard.innerText(),/محجوز للطلبات/);
-   assert.match(await inventoryCard.innerText(),/تقدير|تقريبية|مكافئة|مساحة/);
+   // Historic fractional consumption without cut dimensions must never
+   // be falsely treated as a physical board layout.
    if(width<850){
-     assert.equal(await inventoryCard.isVisible(),true,'Mobile inventory is shown as compact cards');
-     assert.equal(await page.locator('.stock-classic-table').isVisible(),false,'Hide technical table on phone');
+     await inventoryCard.waitFor({state:'visible'});
+     assert.match(await inventoryCard.innerText(),/قصّات قديمة بلا خريطة|جرد البقايا/);
+     assert.match(await inventoryCard.innerText(),/محجوز للطلبات/);
+     assert.equal(await page.locator('.stock-classic-table').isVisible(),false);
    }else{
-     assert.equal(await inventoryCard.isVisible(),false,'Desktop shows editable detailed stock table');
+     assert.equal(await inventoryCard.isVisible(),false);
      assert.equal(await page.locator('.stock-classic-table').isVisible(),true);
    }
    await page.locator('[data-page="costing"]').first().click();
-   const confirmation=page.locator('[data-action="consume-order"]').first();
-   await confirmation.click();
+   let warning='';
+   page.once('dialog',async dialog=>{warning=dialog.message();await dialog.accept()});
+   await page.locator('[data-action="consume-order"]').first().click();
+   await page.waitForTimeout(75);
+   assert.match(warning,/ما خصمنا شي من الخشب|قصّة خشب بلا عرض/);
    let after=await page.evaluate(()=>{
      const db=JSON.parse(localStorage.getItem('LaserPro_Manager_v1_local'));
      return db.usages.find(u=>u.id==='test-usage-reserved')?.state;
    });
-   assert.equal(after,'consumed','Explicit confirmation deducts pending material');
-   await page.locator('[data-action="consume-order"]').first().click();
-   after=await page.evaluate(()=>{
-     const db=JSON.parse(localStorage.getItem('LaserPro_Manager_v1_local'));
-     return db.usages.filter(u=>u.stockId==='test-stock-board'&&u.state==='consumed').length;
-   });
-   assert.equal(after,2,'Confirming twice does not deduct material twice');
+   assert.equal(after,'reserved','Unknown wood cuts cannot be consumed');
    assert.ok(errors.length===0,'No browser errors: '+errors.join('; '));
    await page.close();
    console.log('Laser Pro classic pass at '+width+'px');
