@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#122435"/>
 <link rel="manifest" href="./manifest.webmanifest"/>
 <link rel="stylesheet" href="./theme.css"/>
+<link rel="stylesheet" href="./wood-ui.css"/>
+<script src="./wood-layout.js"></script>
 <link rel="icon" type="image/png" href="./icon-192.png"/>
 <title>Laser Pro Studio — إدارة وملفات مشروعك</title>
 <style>
@@ -113,7 +115,7 @@
  <div class="sidebottom"><b>● يعمل دون إنترنت</b><br>البيانات محفوظة على الجهاز وتتزامن مع السحابة بعد الربط والاتصال بالإنترنت.<br>صدّر نسخة احتياطية بانتظام.</div>
 </aside>
 <main class="main">
- <header class="topbar"><div><h1 id="pageTitle">لوحة التحكم</h1><div class="subtitle">نظام إدارة Laser Pro المعتمد — طلباتك، مصاريفك، ومزامنة أجهزتك</div></div><div class="theme-controls"><button type="button" class="theme-choice theme-shortcut" data-theme-toggle aria-label="التغيير إلى المظهر الداكن">☾ داكن</button><div class="today" id="today"></div></div></header>
+ <header class="topbar"><div><h1 id="pageTitle">لوحة التحكم</h1><div class="subtitle">نظام إدارة Laser Pro المعتمد — طلباتك، مصاريفك، ومزامنة أجهزتك</div></div><div class="theme-controls"><button type="button" class="theme-choice theme-shortcut" data-theme-toggle aria-label="التغيير إلى المظهر الداكن">☾ داكن</button><button type="button" class="theme-choice theme-shortcut" data-page="settings" aria-label="إعدادات المزامنة">☁ الحساب</button><div class="today" id="today"></div></div></header>
  <section class="page active" id="page-dashboard">
   <div class="hero"><div><h2>أهلاً في Laser Pro Manager ✦</h2><p>تابع الطلبات، الأسعار، الزبائن، والمبالغ المدفوعة، وخلي كل تفاصيل مشروعك مرتّبة على اللابتوب أو الموبايل.</p></div><button class="button gold" data-action="new-order">＋ تسجيل طلب جديد</button></div>
   <div class="dash-actions" aria-label="العمليات اليومية">
@@ -247,7 +249,7 @@
   </div>
   <div class="panel" style="margin-top:17px"><div class="panelhead"><h3>إعدادات الوقت والفواتير</h3></div><div class="panelpad"><form id="businessForm" class="settings-grid"><div class="field"><label for="hourlyRate">قيمة ساعة شغلك ($) — اقتراح مبدئي 2$، عدّله حسب تعبك</label><input id="hourlyRate" type="number" step="0.01" min="0" /></div><div class="field"><label for="brandName">اسم المتجر على الفاتورة</label><input id="brandName" maxlength="90" /></div><div class="field"><label for="brandPhone">رقم التواصل</label><input id="brandPhone" maxlength="65" dir="ltr" /></div><div class="field"><label for="brandInstagram">حساب إنستغرام</label><input id="brandInstagram" maxlength="90" dir="ltr" /></div><div class="field full"><label for="invoiceFooter">رسالة آخر الفاتورة</label><input id="invoiceFooter" maxlength="200" /></div><div class="field full"><button class="button" type="submit">حفظ إعدادات العمل والفواتير</button></div></form><p class="hint">الفاتورة إيصال تجاري عادي، وليست فاتورة ضريبية.</p></div></div>
   <div class="panel" style="margin-top:17px"><div class="panelhead"><h3>الربط السحابي بين اللابتوب والموبايل</h3><span class="badge" id="cloudStatus">غير مربوط</span></div><div class="panelpad">
-<div class="hintbox">أولاً: اعمل نسخة JSON من جهازك الأساسي، وبعدها أنشئ مشروع Supabase وجدول البيانات بحسب دليل التثبيت. استخدم نفس حساب الدخول على الجهازين. <b>لا تضع Secret Key أو Service Role هنا إطلاقاً.</b></div>
+<div class="hintbox">البرنامج مربوط بمشروع Laser Pro السحابي. سجّل الدخول بنفس الحساب اللي استعملته على تلفونك، وبعدها بتنتقل البيانات بين التلفون واللابتوب عند الاتصال. خذ نسخة JSON دورياً. <b>لا تشارك كلمة السر مع أي حدا.</b></div>
 <div class="settings-grid" style="margin:12px 0">
 <div class="field full"><label for="cloudUrl">Supabase Project URL</label><input id="cloudUrl" type="url" dir="ltr" placeholder="https://example.supabase.co" autocomplete="off" /></div>
 <div class="field full"><label for="cloudKey">Publishable key (sb_publishable_...)</label><input id="cloudKey" type="text" dir="ltr" placeholder="sb_publishable_..." autocomplete="off" /></div>
@@ -373,7 +375,7 @@ $('#purchasesTable').innerHTML=arr.length?`<table><thead><tr><th>التاريخ<
 function isLowStock(x){return availableStock(x)<=n(x.minimum)}
 function renderInventoryLegacy(){let all=stocks(),total=all.reduce((a,x)=>a+availableStock(x)*effectiveStockUnitCost(x),0),low=all.filter(isLowStock).length;$('#stockMetrics').innerHTML=metric('عدد أصناف المواد',all.length,'مواد مسجلة','▦')+metric('قاربت على النفاد',low,'بحاجة متابعة','!')+metric('قيمة المخزون المتبقي',money(total),'تقديرية حسب سعر الشراء','＄')+metric('أصناف متوفرة',all.length-low,'فوق حد التنبيه','✓');
 let q=$('#stockSearch').value.toLowerCase().trim(),mode=$('#stockFilter').value,arr=all.filter(x=>(mode==='all'||isLowStock(x))&&[x.name,x.supplier,x.category].join(' ').toLowerCase().includes(q)).sort((a,b)=>Number(isLowStock(b))-Number(isLowStock(a))||a.name.localeCompare(b.name,'ar'));
-$('#stockTable').innerHTML=arr.length?`<table><thead><tr><th>المادة</th><th>النوع</th><th>الكمية الحالية</th><th>حدّ التنبيه</th><th>سعر الوحدة</th><th>القيمة</th><th>المورّد</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${arr.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.category||'—')}</td><td>${availableStock(x).toFixed(3)} ${esc(x.unit||'قطعة')}</td><td>${esc(x.minimum)} ${esc(x.unit||'قطعة')}</td><td>${money(effectiveStockUnitCost(x))}</td><td>${money(availableStock(x)*effectiveStockUnitCost(x))}</td><td>${esc(x.supplier||'—')}</td><td><span class="type-chip ${isLowStock(x)?'bad':'good'}">${isLowStock(x)?'⚠ بحاجة شراء':'متوفر'}</span></td><td><div class="inlineactions"><button class="linkbutton" data-action="edit-stock" data-id="${esc(x.id)}">تعديل كمية</button><button class="linkbutton" data-action="delete-stock" data-id="${esc(x.id)}">حذف</button></div></td></tr>`).join('')}</tbody></table>`:`<div class="empty">${mode==='low'?'ما في مواد قربت على النفاد.':'ما سجلت أي مواد بعد.'}</div>`;}
+$('#stockTable').innerHTML=arr.length?`<table><thead><tr><th>المادة</th><th>النوع</th><th>الكمية الحالية</th><th>حدّ التنبيه</th><th>سعر الوحدة</th><th>القيمة</th><th>المورّد</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${arr.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.category||'—')}</td><td>${availableStock(x).toFixed(3)} ${esc(x.unit||'قطعة')}</td><td>${esc(x.minimum)} ${esc(x.unit||'قطعة')}</td><td>${money(effectiveStockUnitCost(x))}</td><td>${money(availableStock(x)*effectiveStockUnitCost(x))}</td><td>${esc(x.supplier||'—')}</td><td><span class="type-chip ${isLowStock(x)?'bad':'good'}">${isLowStock(x)?'⚠ بحاجة شراء':'متوفر'}</span></td><td><div class="inlineactions">${woodIsPanel(x)?`<button class="linkbutton" data-action="board-details" data-id="${esc(x.id)}">خريطة البقايا</button>`:""}<button class="linkbutton" data-action="edit-stock" data-id="${esc(x.id)}">تعديل كمية</button><button class="linkbutton" data-action="delete-stock" data-id="${esc(x.id)}">حذف</button></div></td></tr>`).join('')}</tbody></table>`:`<div class="empty">${mode==='low'?'ما في مواد قربت على النفاد.':'ما سجلت أي مواد بعد.'}</div>`;}
 function renderDeadlines(){const tomorrow=new Date();tomorrow.setHours(0,0,0,0);const horizon=new Date(tomorrow.getTime()+7*86400000);let upcoming=orders().filter(o=>o.dueDate&&o.status!=='تم التسليم'&&o.status!=='ملغى').map(o=>({o,when:new Date(o.dueDate+'T00:00:00')})).filter(x=>Number.isFinite(x.when.getTime())&&x.when<horizon).sort((a,b)=>a.when-b.when).slice(0,8);
 $('#deadlinePanel').innerHTML=upcoming.length?`<div class="deadline-list">${upcoming.map(({o,when})=>`<div class="deadline-item"><div><b>${esc(orderName(o))}</b><div class="small muted">${esc(o.productName||'منتج')} · ${esc(o.dueDate)}</div></div><div class="actions"><span class="type-chip ${when<tomorrow?'bad':''}">${when<tomorrow?'متأخّر':when.getTime()===tomorrow.getTime()?'اليوم':'خلال 7 أيام'}</span><button class="linkbutton" data-action="edit-order" data-id="${esc(o.id)}">فتح الطلب</button></div></div>`).join('')}</div>`:'<div class="hint">ما في تسليمات متأخرة أو خلال الأيام السبعة المقبلة.</div>';}
 function renderSettings(){applyUiTheme();for(let id of ['woodPrice','wastePct','woodW','woodH','baseW','baseH'])$('#'+id).value=db.settings[id]??0;for(const [id,v] of Object.entries(businessSettings()))if($('#'+id))$('#'+id).value=v;updateCloudUI();}
@@ -421,7 +423,7 @@ if(m==='order'){title=id?'تعديل الطلب':'تسجيل طلب جديد';le
 else if(m==='customer'){title=id?'تعديل الزبون':'زبون جديد';html=field('name','الاسم *','text',x.name||'','required maxlength="100"')+field('phone','رقم الهاتف','tel',x.phone||'','maxlength="50"')+field('region','المنطقة','text',x.region||'','maxlength="100"')+select('channel','من وين وصلنا الزبون؟',[['Instagram','Instagram'],['WhatsApp','WhatsApp'],['TikTok','TikTok'],['Facebook','Facebook'],['مباشر','مباشر'],['غير ذلك','غير ذلك']],x.channel||'Instagram')+textArea('note','ملاحظات الزبون',x.note||'');}
 else if(m==='expense'){title=id?'تعديل المصروف':'إضافة مصروف';html=field('date','التاريخ *','date',x.date||today(),'required')+select('category','النوع',[['مواد','مواد'],['كهرباء','كهرباء'],['تغليف','تغليف'],['توصيل','توصيل'],['صيانة','صيانة'],['تسويق','تسويق'],['أخرى','أخرى']],x.category||'مواد')+field('amount','المبلغ ($) *','number',x.amount??0,'required min="0" step="0.01"')+select('stockPurchase','هل هيدا شراء مواد للمخزون؟', [['no','لا، مصروف تشغيل عادي'],['yes','نعم، شراء كياس/كرتون/ريبون/مواد للمخزون']],x.stockPurchase?'yes':'no')+select('linkedStockId','اربط هذا المصروف بمادة موجودة (اختياري)',[['','بدون ربط — لا يُزاد الرصيد'],...stocks().map(m=>[m.id,m.name+' / '+(m.unit||'قطعة')])],x.linkedStockId||'')+field('stockQty','كم وحدة اشتريت بهيدا المبلغ؟','number',x.stockQty??0,'min="0" step="any"')+`<p class="hint field full">مثال: 100 كيس بـ 12$ → اختَر «أكياس تغليف» وأدخل 100؛ السعر التلقائي 0.12$ للكيس. إذا سجلت نفس الشراء بقسم تجهيزات المشروع أو أضفت الـ100 كيس برصيد المخزون قبل، ما تعيد إضافتهم هون كي ما يتكرر الرصيد أو السعر.</p>`+textArea('note','تفاصيل المصروف',x.note||'');}
 else if(m==='purchase'){title=id?'تعديل الغرض المشترى':'تسجيل غرض / تجهيز جديد';html=field('name','اسم الغرض أو المكنة *','text',x.name||'','required maxlength="140" list="suggestPurchases"')+`<datalist id="suggestPurchases"><option value="AlgoLaser Delta 40W"><option value="Epson L8050"><option value="لابتوب"><option value="مكبس حراري مسطح"><option value="مكبس ماغات"><option value="لوح خشب MDF"><option value="خشب Birch Plywood"><option value="NFC tags"><option value="طاولة عمل"><option value="معدات تنظيف وتشطيب"><option value="غراء خشب"></datalist>`+select('category','التصنيف',[['معدات رئيسية','معدات رئيسية'],['أدوات يدوية','أدوات يدوية'],['طابعة وملحقات','طابعة وملحقات'],['لابتوب وكمبيوتر','لابتوب وكمبيوتر'],['مواد أولية','مواد أولية'],['تغليف','تغليف'],['تجهيز المحل','تجهيز المحل'],['تسويق وهوية','تسويق وهوية'],['مصاريف تأسيس أخرى','مصاريف تأسيس أخرى']],x.category||'معدات رئيسية')+select('phase','مرحلة الشراء',[['تأسيس','عند بداية المشروع'],['لاحق','بعد بدء العمل']],x.phase||'تأسيس')+field('date','تاريخ الشراء *','date',x.date||today(),'required')+field('qty','الكمية *','number',x.qty??1,'required min="0.001" step="any"')+field('unitCost','سعر القطعة ($) *','number',x.unitCost??0,'required min="0" step="0.01"')+field('extraCost','تكلفة شحن وتركيب ($)','number',x.extraCost??0,'min="0" step="0.01"')+field('paid','المدفوع فعلياً ($)','number',x.paid??0,'min="0" step="0.01"')+field('supplier','من وين اشتريته؟','text',x.supplier||'','maxlength="150"')+field('warranty','انتهاء الضمان (اختياري)','date',x.warranty||'')+select('linkedStockId','إضافة شراء المواد للمخزون تلقائياً (اختياري)',[['','غير مرتبط بمخزون'],...stocks().map(s=>[s.id,s.name+' — '+s.unit])],x.linkedStockId||'')+field('stockQty','كمية التوريد للمخزون (لا تضيفها يدوياً مرة ثانية)','number',x.stockQty??x.qty??1,'min="0" step="any"')+textArea('note','ملاحظات / رقم فاتورة / حالة الغرض',x.note||'');}
-else if(m==='stock'){title=id?'تعديل مادة بالمخزون':'إضافة مادة إلى المخزون';html=field('name','اسم المادة *','text',x.name||'','required maxlength="140" list="suggestStock"')+`<datalist id="suggestStock"><option value="لوح MDF 120×80"><option value="لوح Birch 244×122"><option value="خشب طبيعي"><option value="خشب أبيض"><option value="خشب بني"><option value="خشب أسود"><option value="تعاليق خشبية"><option value="NFC tags"><option value="غراء"><option value="أكياس تغليف"><option value="كرتون تغليف"><option value="كرت هدية"><option value="ريبون"><option value="شريط ساتان"><option value="أكياس هدايا"><option value="أكريليك أسود"></datalist>`+select('category','نوع المادة',[['خشب','خشب'],['خشب طبيعي','خشب طبيعي'],['خشب أبيض','خشب أبيض'],['خشب بني','خشب بني'],['خشب أسود','خشب أسود'],['أكريليك','أكريليك'],['تعاليق','تعاليق'],['غراء ولواصق','غراء ولواصق'],['تغليف','تغليف'],['طباعة','طباعة'],['أخرى','أخرى']],x.category||'خشب')+field('unit','وحدة القياس (لوح / قطعة / متر...)','text',x.unit||'لوح','maxlength="30"')+field('qty','رصيد المادة المُدخل قبل الصرف *','number',x.qty??0,'required min="0" step="any"')+field('minimum','نبّهني إذا وصلت الكمية إلى','number',x.minimum??1,'min="0" step="any"')+field('unitCost','سعر شراء الوحدة ($)','number',x.unitCost??0,'min="0" step="0.01"')+field('boardWidth','عرض لوح الخشب (سم)، إن كان لوحاً','number',x.boardWidth??db.settings.woodW,'min="0" step="0.1"')+field('boardHeight','طول لوح الخشب (سم)، إن كان لوحاً','number',x.boardHeight??db.settings.woodH,'min="0" step="0.1"')+field('supplier','المورّد','text',x.supplier||'','maxlength="150"')+textArea('note','ملاحظات (السماكة، اللون، القياس...)',x.note||'');}
+else if(m==='stock'){title=id?'تعديل مادة بالمخزون':'إضافة مادة إلى المخزون';html=field('name','اسم المادة *','text',x.name||'','required maxlength="140" list="suggestStock"')+`<datalist id="suggestStock"><option value="لوح MDF 120×80"><option value="لوح Birch 244×122"><option value="خشب طبيعي"><option value="خشب أبيض"><option value="خشب بني"><option value="خشب أسود"><option value="تعاليق خشبية"><option value="NFC tags"><option value="غراء"><option value="أكياس تغليف"><option value="كرتون تغليف"><option value="كرت هدية"><option value="ريبون"><option value="شريط ساتان"><option value="أكياس هدايا"><option value="أكريليك أسود"></datalist>`+select('category','نوع المادة',[['خشب','خشب'],['خشب طبيعي','خشب طبيعي'],['خشب أبيض','خشب أبيض'],['خشب بني','خشب بني'],['خشب أسود','خشب أسود'],['أكريليك','أكريليك'],['تعاليق','تعاليق'],['غراء ولواصق','غراء ولواصق'],['تغليف','تغليف'],['طباعة','طباعة'],['أخرى','أخرى']],x.category||'خشب')+field('unit','وحدة القياس (لوح / قطعة / متر...)','text',x.unit||'لوح','maxlength="30"')+field('qty','رصيد المادة المُدخل قبل الصرف *','number',x.qty??0,'required min="0" step="any"')+field('minimum','نبّهني إذا وصلت الكمية إلى','number',x.minimum??1,'min="0" step="any"')+field('unitCost','سعر شراء الوحدة ($)','number',x.unitCost??0,'min="0" step="0.01"')+field('boardWidth','عرض لوح الخشب (سم)، إن كان لوحاً','number',x.boardWidth??db.settings.woodW,'min="0" step="0.1"')+field('boardHeight','طول لوح الخشب (سم)، إن كان لوحاً','number',x.boardHeight??db.settings.woodH,'min="0" step="0.1"')+field('kerfMm','عرض شق الليزر (ملم) للخشب','number',x.kerfMm??0.2,'min="0" max="10" step="0.05"')+field('supplier','المورّد','text',x.supplier||'','maxlength="150"')+textArea('note','ملاحظات (السماكة، اللون، القياس...)',x.note||'');}
 if(m==='worklog'){title=id?'تعديل وقت الشغل':'إضافة وقت شغل';html=select('orderId','الطلب المرتبط',orderOptions(),x.orderId||orders()[0]?.id||'')+field('date','التاريخ *','date',x.date||today(),'required')+select('stage','مرحلة الشغل',['تصميم','قص','حفر','تشطيب','تركيب','تغليف','أخرى'].map(z=>[z,z]),x.stage||'حفر')+field('minutes','المدة بالدقائق *','number',x.minutes??30,'required min="1" step="1"')+field('hourlyRate','قيمة ساعة الشغل لهذا السجل ($)','number',x.hourlyRate??businessSettings().hourlyRate,'min="0" step="0.01"')+textArea('note','ملاحظات',x.note||'')}
 else if(m==='payment'){title=id?'تعديل الدفعة':'تسجيل دفعة للزبون';html=select('orderId','الطلب *',orderOptions(),x.orderId||window.__nextPaymentOrderId||orders()[0]?.id||'')+field('date','تاريخ القبض *','date',x.date||today(),'required')+field('amount','قيمة الدفعة ($) *','number',x.amount??0,'required min="0.01" step="0.01"')+select('method','طريقة الدفع',['نقداً','تحويل','Whish','OMT','أخرى'].map(z=>[z,z]),x.method||'نقداً')+textArea('note','ملاحظات الدفعة',x.note||'');window.__nextPaymentOrderId=null}
 else if(m==='debt'){title=id?'تعديل دين':'دين جديد';html=select('direction','نوع الدين',[['لي','إلي — مستحق من شخص'],['عليّ','عليّ — لازم أدفع لشخص']],x.direction||'لي')+field('party','اسم الشخص / الجهة *','text',x.party||'','required maxlength="140"')+field('phone','الهاتف','tel',x.phone||'','maxlength="50"')+field('date','تاريخ الدين *','date',x.date||today(),'required')+field('dueDate','تاريخ الاستحقاق','date',x.dueDate||'')+field('amount','المبلغ الأصلي ($) *','number',x.amount??0,'required min="0.01" step="0.01"')+field('paid','المدفوع حتى اليوم ($)','number',x.paid??0,'required min="0" step="0.01"')+textArea('note','ملاحظات',x.note||'')+`<p class="hint field full">المدفوع هون إجمالي مسجّل للدين المستقل؛ ديون الطلبات والموردين بتنحسب تلقائياً من أقسامها، مش من هون.</p>`;}
@@ -478,7 +480,85 @@ function recalculateMaterialQty(){let q=Math.max(1,n($('#f_qty').value));for(con
 function previewPickerHasWood(){return materialRows().some(r=>r.querySelector('.material-check').checked&&itemCategory(stocks().find(s=>s.id===r.dataset.sid))==='خشب')}
 function previewPickerCost(){return materialRows().reduce((sum,r)=>sum+(r.querySelector('.material-check').checked?n(r.querySelector('.material-qty').value)*n(r.dataset.rate):0),0)}
 function updatePickerTotals(){let box=$('#orderMaterialTotal');if(!box)return;let count=0,sub={خشب:0,تغليف:0,'مواد أخرى':0},warning=[];for(const r of materialRows()){let on=r.querySelector('.material-check').checked,q=n(r.querySelector('.material-qty').value),s=stocks().find(s=>s.id===r.dataset.sid),cost=q*n(r.dataset.rate),cell=r.querySelector('.material-subtotal');cell.textContent=money(on?cost:0);r.classList.toggle('selected',on);r.querySelector('.material-qty').disabled=!on;if(on){count++;sub[itemCategory(s)]+=cost;if(n(r.dataset.rate)<=0)warning.push(s?.name||'مادة')}}box.innerHTML=`<b>${count} مادة مختارة — كلفتها ${money(Object.values(sub).reduce((a,x)=>a+x,0))}</b><div class="small">خشب: ${money(sub['خشب'])} | تغليف: ${money(sub['تغليف'])} | أخرى: ${money(sub['مواد أخرى'])}</div>${warning.length?'<div class="warn-text">⚠ سعر الشراء غير مسجّل: '+esc(warning.join('، '))+'</div>':''}`}
-function syncOrderMaterialsFromEditor(o){const chosen=new Map();for(const row of materialRows()){const input=row.querySelector('.material-qty');if(!row.querySelector('.material-check').checked)continue;const qty=Number(input.value),stock=stocks().find(s=>s.id===row.dataset.sid);if(!stock||!Number.isFinite(qty)||qty<=0)throw Error('راجع كمية المادة '+(stock?.name||''));chosen.set(stock.id,{stock,qty,cost:n(row.dataset.rate),perUnit:n(input.dataset.perunit)});}const oldUses=usages().filter(u=>u.orderId===o.id&&!u.autoWood),seen=new Set();for(const u of oldUses){const data=chosen.get(u.stockId);if(!data||seen.has(u.stockId)){u.deleted=true;touch(u);continue;}Object.assign(u,{qty:data.qty,role:itemCategory(data.stock),stockName:data.stock.name,perUnit:data.perUnit,recipeId:null,costPerUnit:n(u.costPerUnit)>0?u.costPerUnit:data.cost});if(u.state==='released'&&o.status!=='ملغى')u.state='reserved';touch(u);seen.add(u.stockId)}for(const [sid,data] of chosen){if(seen.has(sid))continue;db.usages.push({id:uuid(),orderId:o.id,stockId:sid,stockName:data.stock.name,role:itemCategory(data.stock),qty:data.qty,costPerUnit:data.cost,recipeId:null,perUnit:data.perUnit,state:'reserved',note:'من قائمة مواد الطلب',createdAt:stamp(),updatedAt:stamp(),deleted:false})}o.useWoodFromStock=Array.from(chosen.values()).some(x=>itemCategory(x.stock)==='خشب');touch(o)}
+function syncOrderMaterialsFromEditor(o){
+ const chosen=new Map();
+ for(const row of materialRows()){
+  if(!row.querySelector('.material-check').checked)continue;
+  const input=row.querySelector('.material-qty'),qty=Number(input.value),stock=stocks().find(s=>s.id===row.dataset.sid);
+  const cutPieces=getManualCuts(row);
+  if(!stock||!Number.isFinite(qty)||qty<=0)throw Error('راجع كمية المادة '+(stock?.name||''));
+  chosen.set(stock.id,{stock,qty,cost:n(row.dataset.rate),perUnit:n(input.dataset.perunit),cutPieces});
+ }
+ const oldUses=usages().filter(u=>u.orderId===o.id&&!u.autoWood),seen=new Set();
+ for(const u of oldUses){
+  const data=chosen.get(u.stockId);
+  if(u.state==='consumed'&&(!data||Math.abs(n(u.qty)-n(data.qty))>.000001||JSON.stringify(u.cutPieces||[])!==JSON.stringify(data.cutPieces||[])))
+   throw Error('مواد هيدا الطلب مخصومة من المخزون. ما فيك تغيّر قصّاتها بدون حركة إرجاع منفصلة.');
+  if(!data||seen.has(u.stockId)){u.deleted=true;touch(u);continue}
+  Object.assign(u,{qty:data.qty,role:itemCategory(data.stock),stockName:data.stock.name,perUnit:data.perUnit,
+   recipeId:null,costPerUnit:n(u.costPerUnit)>0?u.costPerUnit:data.cost,cutPieces:data.cutPieces||u.cutPieces||null});
+  if(u.state==='released'&&o.status!=='ملغى')u.state='reserved';
+  touch(u);seen.add(u.stockId);
+ }
+ for(const [sid,data]of chosen){
+  if(seen.has(sid))continue;
+  db.usages.push({id:uuid(),orderId:o.id,stockId:sid,stockName:data.stock.name,role:itemCategory(data.stock),
+   qty:data.qty,costPerUnit:data.cost,cutPieces:data.cutPieces,recipeId:null,perUnit:data.perUnit,state:'reserved',
+   note:'قصّات محددة من قائمة مواد الطلب',createdAt:stamp(),updatedAt:stamp(),deleted:false});
+ }
+ o.useWoodFromStock=Array.from(chosen.values()).some(x=>itemCategory(x.stock)==='خشب');touch(o);
+}
+// Multiple measured cuts from one stock wood sheet (manual orders).
+const baseMaterialPicker=renderOrderMaterialPicker;
+renderOrderMaterialPicker=function(order){
+ baseMaterialPicker(order);
+ for(const row of materialRows()){
+  const mat=stocks().find(s=>s.id===row.dataset.sid);
+  if(!mat||itemCategory(mat)!=='خشب'||!/لوح/i.test(mat.unit||''))continue;
+  const past=order?.id?orderUses(order).find(u=>u.stockId===mat.id&&!u.autoWood):null;
+  row.dataset.woodCuts='true';
+  row.insertAdjacentHTML('beforeend',`<div class="wood-cuts-form"><b>قصّات هاللوح (سم)</b>
+  <div class="wood-cuts-rows"></div>
+  <button class="button secondary sm" type="button" data-add-cut>＋ إضافة مقاس ثاني</button>
+  <span class="small muted">أدخل عرض وطول وعدد كل قصّة. رح ينحسب جزء اللوح والسعر تلقائياً.</span></div>`);
+  const cuts=past?.cutPieces?.length?past.cutPieces:[{w:'',h:'',count:1}];
+  for(const c of cuts)addWoodCutInput(row,c);
+  row.querySelector('[data-add-cut]').onclick=()=>{addWoodCutInput(row,{w:'',h:'',count:1});updateWoodCutQuantity(row)};
+  row.querySelector('.material-qty').readOnly=true;
+  updateWoodCutQuantity(row);
+ }
+};
+function addWoodCutInput(row,cut){
+ const box=document.createElement('div');box.className='wood-cut-entry';
+ box.innerHTML=`<label>عرض<input class="wood-w" type="number" min="0.1" step=".1" value="${esc(cut.w||'')}"></label>
+ <label>طول<input class="wood-h" type="number" min="0.1" step=".1" value="${esc(cut.h||'')}"></label>
+ <label>عدد<input class="wood-count" type="number" min="1" step="1" value="${esc(cut.count||1)}"></label>
+ <button type="button" class="linkbutton" data-del-cut>×</button>`;
+ row.querySelector('.wood-cuts-rows').append(box);
+ box.querySelectorAll('input').forEach(e=>e.oninput=()=>updateWoodCutQuantity(row));
+ box.querySelector('[data-del-cut]').onclick=()=>{box.remove();updateWoodCutQuantity(row)};
+}
+function woodCutsOfRow(row){return [...row.querySelectorAll('.wood-cut-entry')].map(el=>({
+ w:Number(el.querySelector('.wood-w').value),h:Number(el.querySelector('.wood-h').value),count:Number(el.querySelector('.wood-count').value)}))}
+function updateWoodCutQuantity(row){
+ const mat=stocks().find(s=>s.id===row.dataset.sid);if(!mat)return;
+ const area=n(mat.boardWidth)*n(mat.boardHeight),gap=n(mat.kerfMm)/10,cuts=woodCutsOfRow(row);
+ const valid=area>0&&cuts.length>0&&cuts.every(c=>c.w>0&&c.h>0&&Number.isInteger(c.count)&&c.count>0);
+ row.querySelector('.material-qty').value=valid?(cuts.reduce((t,c)=>t+(c.w+gap)*(c.h+gap)*c.count,0)/area).toFixed(6):'0';
+ updatePickerTotals();orderSummary();
+}
+function getManualCuts(row){
+ if(!row.dataset.woodCuts)return null;
+ const cuts=woodCutsOfRow(row);
+ if(!cuts.length||cuts.some(c=>!(c.w>0&&c.h>0&&Number.isInteger(c.count)&&c.count>0)))
+  throw Error('لازم عرض وطول وعدد كل قصّة خشب: '+stocks().find(x=>x.id===row.dataset.sid)?.name);
+ return cuts;
+}
+const baseRecalculateMaterialQty=recalculateMaterialQty;
+recalculateMaterialQty=function(){
+ baseRecalculateMaterialQty();
+ for(const row of materialRows())if(row.dataset.woodCuts)updateWoodCutQuantity(row);
+};
 function openOrderMaterialShortcut(){const o=orderOfCosting();if(!o)return alert('اختَر طلباً أولاً');openModal('order',o.id);const e=$('#orderMaterialPicker');if(e)e.scrollIntoView({block:'center',behavior:'smooth'})}
 function doSaveForm(e){e.preventDefault();try{
  if(mode==='order'){const customerName=getf('customerName');if(!customerName)throw Error('لازم اسم الزبون');let p=getProduct(getf('productId'));let old=editingId?db.orders.find(z=>z.id===editingId):null;if(!p&&!(old&&old.productId===getf('productId')))throw Error('اختر المنتج');const q=Number(getf('qty')),price=validateMoney(getf('price')),paid=validateMoney(getf('paid')),extra=validateMoney(getf('extraCost'));if(!Number.isInteger(q)||q<1||price===null||paid===null||extra===null)throw Error('راجع القيم الرقمية');if(paid>price*q)throw Error('المبلغ المدفوع أكبر من قيمة الطلب');const woodQuote=portraitQuoteFromEditor(),quickMinutesInput=Number(getf('quickMinutes')||0),quickRateInput=0,estimateMinutesInput=Number(getf('estimateMinutes')||0);if(!Number.isFinite(estimateMinutesInput)||estimateMinutesInput<0)throw Error('وقت التنفيذ التقديري غير صحيح');if(isPortraitProduct(p)&&(!(woodQuote.width>0)||!(woodQuote.height>0)))throw Error('حدد عرض وارتفاع الصورة لحساب الواجهة والخلفية بدقة.');
@@ -487,11 +567,15 @@ for(const part of [['hasBackground','backgroundWidthCm','backgroundHeightCm','ا
 
 let shortage=[];for(const row of materialRows()){if(!row.querySelector('.material-check').checked)continue;const stock=stocks().find(s=>s.id===row.dataset.sid),want=Number(row.querySelector('.material-qty').value);if(!stock||!Number.isFinite(want)||want<=0)throw Error('كمية غير صحيحة للمادة '+(stock?.name||''));const prev=old?orderUses(old).filter(u=>u.stockId===stock.id).reduce((v,u)=>v+n(u.qty),0):0,spare=availableStock(stock)+((old?.status==='ملغى')?0:prev);if(getf('status')!=='ملغى'&&want>spare+0.0000001)shortage.push(stock.name+' (متاح '+spare.toFixed(2)+'، مطلوب '+want+')')}
 if(shortage.length&&!confirm('كمية المخزون غير كافية لهذه المواد:\n'+shortage.join('\n')+'\nيمكن تكمل، لكن الرصيد رح يظهر سالب. تكمل؟'))return;
-let cust=upsertCustomer(customerName,getf('customerPhone'),getf('customerRegion'),getf('customerChannel'),old?.customerId);let useCurrentProduct=!!p;let changedProduct=!old||old.productId!==getf('productId');if(old&&changedProduct&&orderUses(old).length&&!confirm('الطلب عليه مواد منصرفة من المنتج السابق. تغيير المنتج لا يحذفها تلقائياً؛ راجع تكلفة الطلب بعد التعديل. بدك تكمل؟'))return;let unitCost=changedProduct?(useCurrentProduct?productCost(p):null):old.unitCost;let paymentDelta=paid-n(old?.paid);const priorStatus=old?.status;const changedFinal=!!(old?.finalSnapshot&&(q!==n(old.qty)||price!==n(old.price)||extra!==n(old.extraCost)||getf('productId')!==old.productId||(getf('woodKind')!==(old.woodKind||'طبيعي')||n(getf('photoWidthCm'))!==n(old.photoWidthCm??portraitDimensions(getProduct(old.productId))?.[0])||n(getf('photoHeightCm'))!==n(old.photoHeightCm??portraitDimensions(getProduct(old.productId))?.[1])||getFlag('hasBackground')!==!!(old.hasBackground??true)||getFlag('hasBase')!==!!(old.hasBase??true)||getFlag('hasStand')!==!!old.hasStand||n(getf('backgroundWidthCm'))!==n(old.backgroundWidthCm??old.photoWidthCm)||n(getf('backgroundHeightCm'))!==n(old.backgroundHeightCm??old.photoHeightCm)||n(getf('baseWidthCm'))!==n(old.baseWidthCm??db.settings.baseW)||n(getf('baseHeightCm'))!==n(old.baseHeightCm??db.settings.baseH)||n(getf('standWidthCm'))!==n(old.standWidthCm)||n(getf('standHeightCm'))!==n(old.standHeightCm))));if(changedFinal&&!confirm('هيدا طلب مسلّم وكلفته محفوظة. التعديل رح يغيّر التكلفة النهائية المثبتة. تكمل؟'))return;let o=old||{id:uuid(),createdAt:stamp(),code:'قيد الترقيم'};Object.assign(o,{customerId:cust.id,customerName:cust.name,customerPhone:cust.phone,customerRegion:cust.region,customerChannel:cust.channel,productId:getf('productId'),productName:useCurrentProduct?p.name:(old?.productName||''),productSize:useCurrentProduct?p.size:(old?.productSize||''),qty:q,price,woodKind:getf('woodKind')||'طبيعي',photoWidthCm:woodQuote.width,photoHeightCm:woodQuote.height,hasBackground:getFlag('hasBackground'),backgroundWidthCm:n(getf('backgroundWidthCm')),backgroundHeightCm:n(getf('backgroundHeightCm')),hasBase:getFlag('hasBase'),baseWidthCm:n(getf('baseWidthCm')),baseHeightCm:n(getf('baseHeightCm')),hasStand:getFlag('hasStand'),standWidthCm:n(getf('standWidthCm')),standHeightCm:n(getf('standHeightCm')),paid:old?n(old.paid):0,legacyPaid:old?(Number.isFinite(Number(old.legacyPaid))?Number(old.legacyPaid):n(old.paid)):0,extraCost:extra,estimateMinutes:estimateMinutesInput,status:getf('status'),dueDate:getf('dueDate'),notes:getf('notes'),costKnown:isPortraitProduct(p)?(old?.finalSnapshot&&!changedFinal?!!old.costKnown:woodQuote.known):(unitCost!==null&&unitCost!==undefined),unitCost:isPortraitProduct(p)?(old?.finalSnapshot&&!changedFinal?n(old.unitCost):(woodQuote.known?woodQuote.unitCost:0)):(unitCost??0),deleted:false});touch(o);if(!old)db.orders.push(o);applyRecipeOnOrder(o,!old);syncOrderMaterialsFromEditor(o);if(!old||old.status!=='تم التسليم'||changedFinal)syncAutoPortraitWood(o);const quickMinutes=quickMinutesInput;if(quickMinutes>0){db.worklogs.push({id:uuid(),orderId:o.id,date:today(),stage:'شغل سريع من الطلب',minutes:quickMinutes,hourlyRate:quickRateInput,note:'وقت مسجّل مع حفظ الطلب',createdAt:stamp(),updatedAt:stamp(),deleted:false})}if(changedFinal)o.finalSnapshot=null;if(o.status==='تم التسليم'&&(!old||priorStatus!=='تم التسليم'||changedFinal))finalizeOrderCost(o);if(o.status==='ملغى')releaseOrderReservations(o);if(Math.abs(paymentDelta)>0.0001){db.payments.push({id:uuid(),orderId:o.id,date:today(),amount:Math.round(paymentDelta*100)/100,method:'نقداً',note:old?'تعديل إجمالي المدفوع من الطلب':'دفعة أولى عند فتح الطلب',createdAt:stamp(),updatedAt:stamp(),deleted:false});recalculateOrderPaid(o)}
+let cust=upsertCustomer(customerName,getf('customerPhone'),getf('customerRegion'),getf('customerChannel'),old?.customerId);let useCurrentProduct=!!p;let changedProduct=!old||old.productId!==getf('productId');if(old&&changedProduct&&orderUses(old).length&&!confirm('الطلب عليه مواد منصرفة من المنتج السابق. تغيير المنتج لا يحذفها تلقائياً؛ راجع تكلفة الطلب بعد التعديل. بدك تكمل؟'))return;let unitCost=changedProduct?(useCurrentProduct?productCost(p):null):old.unitCost;let paymentDelta=paid-n(old?.paid);const priorStatus=old?.status;const changedFinal=!!(old?.finalSnapshot&&(q!==n(old.qty)||price!==n(old.price)||extra!==n(old.extraCost)||getf('productId')!==old.productId||(getf('woodKind')!==(old.woodKind||'طبيعي')||n(getf('photoWidthCm'))!==n(old.photoWidthCm??portraitDimensions(getProduct(old.productId))?.[0])||n(getf('photoHeightCm'))!==n(old.photoHeightCm??portraitDimensions(getProduct(old.productId))?.[1])||getFlag('hasBackground')!==!!(old.hasBackground??true)||getFlag('hasBase')!==!!(old.hasBase??true)||getFlag('hasStand')!==!!old.hasStand||n(getf('backgroundWidthCm'))!==n(old.backgroundWidthCm??old.photoWidthCm)||n(getf('backgroundHeightCm'))!==n(old.backgroundHeightCm??old.photoHeightCm)||n(getf('baseWidthCm'))!==n(old.baseWidthCm??db.settings.baseW)||n(getf('baseHeightCm'))!==n(old.baseHeightCm??db.settings.baseH)||n(getf('standWidthCm'))!==n(old.standWidthCm)||n(getf('standHeightCm'))!==n(old.standHeightCm))));if(changedFinal&&old&&orderUses(old).some(u=>u.state==='consumed'&&u.role==='خشب'))throw Error('قصّات هيدا الطلب سبق انخصمت. لتغيير المقاس لازم تسجيل إرجاع مخزون مستقل أولاً.');if(changedFinal&&!confirm('هيدا طلب مسلّم وكلفته محفوظة. التعديل رح يغيّر التكلفة النهائية المثبتة. تكمل؟'))return;let o=old||{id:uuid(),createdAt:stamp(),code:'قيد الترقيم'};Object.assign(o,{customerId:cust.id,customerName:cust.name,customerPhone:cust.phone,customerRegion:cust.region,customerChannel:cust.channel,productId:getf('productId'),productName:useCurrentProduct?p.name:(old?.productName||''),productSize:useCurrentProduct?p.size:(old?.productSize||''),qty:q,price,woodKind:getf('woodKind')||'طبيعي',photoWidthCm:woodQuote.width,photoHeightCm:woodQuote.height,hasBackground:getFlag('hasBackground'),backgroundWidthCm:n(getf('backgroundWidthCm')),backgroundHeightCm:n(getf('backgroundHeightCm')),hasBase:getFlag('hasBase'),baseWidthCm:n(getf('baseWidthCm')),baseHeightCm:n(getf('baseHeightCm')),hasStand:getFlag('hasStand'),standWidthCm:n(getf('standWidthCm')),standHeightCm:n(getf('standHeightCm')),paid:old?n(old.paid):0,legacyPaid:old?(Number.isFinite(Number(old.legacyPaid))?Number(old.legacyPaid):n(old.paid)):0,extraCost:extra,estimateMinutes:estimateMinutesInput,status:getf('status'),dueDate:getf('dueDate'),notes:getf('notes'),costKnown:isPortraitProduct(p)?(old?.finalSnapshot&&!changedFinal?!!old.costKnown:woodQuote.known):(unitCost!==null&&unitCost!==undefined),unitCost:isPortraitProduct(p)?(old?.finalSnapshot&&!changedFinal?n(old.unitCost):(woodQuote.known?woodQuote.unitCost:0)):(unitCost??0),deleted:false});touch(o);if(!old)db.orders.push(o);applyRecipeOnOrder(o,!old);syncOrderMaterialsFromEditor(o);if(!old||old.status!=='تم التسليم'||changedFinal)syncAutoPortraitWood(o);const quickMinutes=quickMinutesInput;if(quickMinutes>0){db.worklogs.push({id:uuid(),orderId:o.id,date:today(),stage:'شغل سريع من الطلب',minutes:quickMinutes,hourlyRate:quickRateInput,note:'وقت مسجّل مع حفظ الطلب',createdAt:stamp(),updatedAt:stamp(),deleted:false})}if(changedFinal)o.finalSnapshot=null;if(o.status==='تم التسليم'&&(!old||priorStatus!=='تم التسليم'||changedFinal))finalizeOrderCost(o);if(o.status==='ملغى')releaseOrderReservations(o);if(Math.abs(paymentDelta)>0.0001){db.payments.push({id:uuid(),orderId:o.id,date:today(),amount:Math.round(paymentDelta*100)/100,method:'نقداً',note:old?'تعديل إجمالي المدفوع من الطلب':'دفعة أولى عند فتح الطلب',createdAt:stamp(),updatedAt:stamp(),deleted:false});recalculateOrderPaid(o)}
  }else if(mode==='product'){let cost=getf('cost'),side=getf('portraitSide'),price=validateMoney(getf('price'));if(!getf('name')||price===null||(cost!==''&&validateMoney(cost)===null)||(side!==''&&validateMoney(side)===null))throw Error('راجع بيانات المنتج');let old=editingId?db.products.find(z=>z.id===editingId):null;let o=old||{id:uuid(),createdAt:stamp()};Object.assign(o,{name:getf('name'),size:getf('size'),price,cost:cost===''?null:Number(cost),portraitSide:side===''||Number(side)===0?null:Number(side),deleted:false});touch(o);if(!old)db.products.push(o);
  }else if(mode==='customer'){if(!getf('name'))throw Error('ادخل اسم الزبون');let old=editingId?db.customers.find(z=>z.id===editingId):null;let o=old||{id:uuid(),createdAt:stamp()};Object.assign(o,{name:getf('name'),phone:getf('phone'),region:getf('region'),channel:getf('channel'),note:getf('note'),deleted:false});touch(o);if(!old)db.customers.push(o);
  }else if(mode==='expense'){let amount=validateMoney(getf('amount'));if(!getf('date')||amount===null)throw Error('التاريخ والمبلغ مطلوبان');let old=editingId?db.expenses.find(z=>z.id===editingId):null;let o=old||{id:uuid(),createdAt:stamp()};const stockPurchase=getf('stockPurchase')==='yes',linkedStockId=stockPurchase?getf('linkedStockId'):'';const stockQty=Number(getf('stockQty')||0);if(linkedStockId&&(!stocks().some(x=>x.id===linkedStockId)||!Number.isFinite(stockQty)||stockQty<=0))throw Error('اختر مادة صحيحة وعدد القطع المشتراة');Object.assign(o,{date:getf('date'),category:getf('category'),amount,stockPurchase,linkedStockId,stockQty:linkedStockId?stockQty:0,note:getf('note'),deleted:false});touch(o);if(!old)db.expenses.push(o)} else if(mode==='purchase'){let name=getf('name'),qty=Number(getf('qty')),unitCost=validateMoney(getf('unitCost')),extraCost=validateMoney(getf('extraCost')||0),paid=validateMoney(getf('paid')||0);if(!name||!getf('date')||!Number.isFinite(qty)||qty<=0||unitCost===null||extraCost===null||paid===null)throw Error('راجع بيانات التجهيز والمبلغ والكمية');if(getf('linkedStockId')&&(!Number.isFinite(Number(getf('stockQty')))||Number(getf('stockQty'))<0))throw Error('كمية توريد المخزون غير صالحة');if(paid>qty*unitCost+extraCost+0.0001)throw Error('المدفوع أكبر من إجمالي سعر المشتريات');let old=editingId?db.purchases.find(z=>z.id===editingId):null;let o=old||{id:uuid(),createdAt:stamp()};Object.assign(o,{name,date:getf('date'),category:getf('category'),phase:getf('phase'),qty,unitCost,extraCost,paid,supplier:getf('supplier'),warranty:getf('warranty'),linkedStockId:getf('linkedStockId'),stockQty:getf('linkedStockId')?Number(getf('stockQty')):0,note:getf('note'),deleted:false});touch(o);if(!old)db.purchases.push(o);
-}else if(mode==='stock'){let name=getf('name'),qty=Number(getf('qty')),minimum=Number(getf('minimum')||0),unitCost=validateMoney(getf('unitCost')||0);if(!name||![qty,minimum].every(v=>Number.isFinite(v)&&v>=0)||unitCost===null)throw Error('راجع بيانات المخزون والكميات');let old=editingId?db.stocks.find(z=>z.id===editingId):null;let o=old||{id:uuid(),createdAt:stamp()};Object.assign(o,{name,category:getf('category'),unit:getf('unit')||'قطعة',qty,minimum,unitCost,boardWidth:Math.max(0,n(getf('boardWidth'))),boardHeight:Math.max(0,n(getf('boardHeight'))),supplier:getf('supplier'),note:getf('note'),deleted:false});touch(o);if(!old)db.stocks.push(o);
+}else if(mode==='stock'){let name=getf('name'),qty=Number(getf('qty')),minimum=Number(getf('minimum')||0),unitCost=validateMoney(getf('unitCost')||0);if(!name||![qty,minimum].every(v=>Number.isFinite(v)&&v>=0)||unitCost===null)throw Error('راجع بيانات المخزون والكميات');let old=editingId?db.stocks.find(z=>z.id===editingId):null;let o=old||{id:uuid(),createdAt:stamp()};const bw=Math.max(0,n(getf('boardWidth'))),bh=Math.max(0,n(getf('boardHeight'))),kerf=Number(getf('kerfMm')||0),sheet=/خشب|أكريليك/.test(getf('category'))&&/لوح/i.test(getf('unit'));
+if(sheet&&(!Number.isInteger(qty)||bw<=0||bh<=0||!Number.isFinite(kerf)||kerf<0||kerf>10))throw Error('الألواح تحتاج عدد ألواح صحيح وقياس لوح وعرض شق قص صالح');
+if(old?.woodLayout&&(bw!==n(old.boardWidth)||bh!==n(old.boardHeight)))throw Error('ما فينا نغيّر قياسات الألواح اللي عليها سجل قصّات. أضف مادة ثانية بمقاس جديد.');
+if(old?.woodLayout&&qty+stockReceived(old)<old.woodLayout.boards.length)throw Error('ما فينا نقلّل عدد الألواح تحت العدد المسجّل في سجل القصّات.');
+Object.assign(o,{name,category:getf('category'),unit:getf('unit')||'قطعة',qty,minimum,unitCost,boardWidth:bw,boardHeight:bh,kerfMm:kerf,supplier:getf('supplier'),note:getf('note'),deleted:false});touch(o);if(!old)db.stocks.push(o);
 }else if(mode==='worklog'){let order=db.orders.find(z=>z.id===getf('orderId')&&!z.deleted),mins=Number(getf('minutes')),rate=validateMoney(getf('hourlyRate'));if(!order||!getf('date')||!Number.isInteger(mins)||mins<1||rate===null)throw Error('اختر طلب وحدّد دقائق وسعر ساعة صحيح');let old=editingId?db.worklogs.find(z=>z.id===editingId):null;let o=old||{id:uuid(),createdAt:stamp()};Object.assign(o,{orderId:order.id,date:getf('date'),stage:getf('stage'),minutes:mins,hourlyRate:rate,note:getf('note'),deleted:false});touch(o);if(!old)db.worklogs.push(o);
 }else if(mode==='payment'){let order=db.orders.find(z=>z.id===getf('orderId')&&!z.deleted),amount=validateMoney(getf('amount'));if(!order||!getf('date')||amount===null||amount<=0)throw Error('اختر طلب ومبلغ صحيح');let old=editingId?db.payments.find(z=>z.id===editingId):null;let oldOrder=old&&db.orders.find(z=>z.id===old.orderId);const currentOld=old&&old.orderId===order.id?n(old.amount):0;const projected=n(order.paid)-currentOld+amount;if(projected>orderTotal(order)+0.001)throw Error('مجموع الدفعات أكبر من قيمة الطلب');if(!Number.isFinite(Number(order.legacyPaid)))order.legacyPaid=n(order.paid)-sumPayments(order.id);if(oldOrder&&oldOrder.id!==order.id&&!Number.isFinite(Number(oldOrder.legacyPaid)))oldOrder.legacyPaid=n(oldOrder.paid)-sumPayments(oldOrder.id);let o=old||{id:uuid(),createdAt:stamp()};Object.assign(o,{orderId:order.id,date:getf('date'),amount,method:getf('method'),note:getf('note'),deleted:false});touch(o);if(!old)db.payments.push(o);recalculateOrderPaid(order);if(oldOrder&&oldOrder.id!==order.id)recalculateOrderPaid(oldOrder);
 }else if(mode==='debt'){const amount=validateMoney(getf('amount')),paid=validateMoney(getf('paid'));if(!getf('party')||!getf('date')||amount===null||amount<=0||paid===null||paid>amount)throw Error('راجع اسم الجهة والمبلغ والمدفوع: المدفوع ما لازم يتجاوز أصل الدين');let old=editingId?db.debts.find(z=>z.id===editingId):null;let o=old||{id:uuid(),createdAt:stamp()};Object.assign(o,{direction:getf('direction'),party:getf('party'),phone:getf('phone'),date:getf('date'),dueDate:getf('dueDate'),amount,paid,note:getf('note'),deleted:false});touch(o);if(!old)db.debts.push(o);
@@ -683,6 +767,12 @@ $('#recipeProduct').addEventListener('change',suggestRecipeAmount);
 const CLOUD_CFG_KEY='LaserPro_Cloud_Config_v12',CLOUD_TOKEN_KEY='LaserPro_Cloud_Token_v12';
 let cloudConfig={},cloudToken=null,cloudBusy=false,cloudTimer=null,lastCloudSync='';
 try{cloudConfig=JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'{}')||{};cloudToken=JSON.parse(localStorage.getItem(CLOUD_TOKEN_KEY)||'null')}catch(e){cloudConfig={};cloudToken=null}
+// Published app uses the user's Laser Pro Supabase account by default.
+// A pre-existing custom server is never overwritten.
+if(!cloudConfig.url&&!cloudConfig.key){
+ cloudConfig={url:'https://cdzpaeygafjgfhhjvugt.supabase.co',key:'sb_publishable_nkn2b--D6qmAIqewh0axKg_2hjNw2hO'};
+ try{localStorage.setItem(CLOUD_CFG_KEY,JSON.stringify(cloudConfig))}catch(e){}
+}
 if(cloudToken?.user?.id&&cloudConfig.url&&!localStorage.getItem('LaserPro_Manager_Cloud_Owner_v2')){localStorage.setItem('LaserPro_Manager_Cloud_Owner_v2',cloudToken.user.id+'@'+new URL(cloudConfig.url).host)}
 function cloudStatus(s){lastCloudSync=s;updateCloudUI()}
 function updateCloudUI(){let badge=$('#cloudStatus'),msg=$('#cloudLastSync');if(!badge)return;
@@ -745,7 +835,7 @@ function estimateCost(o){
 }
 function finalizeOrderCost(o){
  if(o.finalSnapshot)return;
- for(const u of orderUses(o))if(u.state==='reserved'){u.state='consumed';touch(u)}
+ // Saving/delivering does not subtract material. Only explicit confirmation does.
  const d=orderDirectCost(o);
  o.finalSnapshot={date:today(),timestamp:stamp(),materials:d,labor:0,overhead:0,totalCost:d,
  sales:orderTotal(o),profit:orderTotal(o)-d,
@@ -778,62 +868,139 @@ const originalRenderCostDetails=renderCostDetailsLegacy;
 function renderCostDetails(){originalRenderCostDetails();let o=orderOfCosting();if(!o)return;const el=$('#costSummary'),e=estimateCost(o);el.insertAdjacentHTML('afterbegin',`<div class="hintbox"><b>الربح المتوقع قبل الإنجاز: ${money(e.profit)}</b> · التكلفة المتوقعة ${money(e.total)} · وقت باقي مقدّر ${money(e.expectedLabor)}. <span class="muted">الربح الفعلي بيتثبت بعد إنهاء التصنيع وتسجيل المواد وساعات العمل. ${o.finalSnapshot?(o.finalSnapshot.complete?'طلب مكتمل بتكلفته المسجلة.':'الطلب مسلّم لكن ساعات العمل أو بعض تكاليفه غير مؤكدة؛ سجّلها ثم ثبّت التكلفة من جديد.'):''}</span></div>`);const packing=orderUses(o).filter(u=>u.role==='تغليف'&&u.state!=='released');const note=portraitQuoteForOrder(o);if(isPortraitProduct(getProduct(o.productId))&&!o.costKnown&&!woodActual(o)){el.insertAdjacentHTML('afterbegin','<div class="notice">⚠ سعر الخشب غير مسجّل. الربح المعروض تقديري ناقص كلفة الخشب، ولا يُعتبر ربحاً نهائياً.</div>');}el.insertAdjacentHTML('beforeend',`<div class="hintbox"><b>تفصيل مواد التغليف المختارة:</b>${packing.length?packing.map(u=>`<div class="summaryline"><span>${esc(u.stockName)} × ${n(u.qty)} ${esc(stocks().find(s=>s.id===u.stockId)?.unit||'قطعة')}</span><b>${money(n(u.qty)*n(u.costPerUnit))}</b></div>`).join(''):'<p>لا توجد مواد تغليف لهذا الطلب بعد.</p>'}${isPortraitProduct(getProduct(o.productId))?`<p class="small">حساب الخشب: ${esc(note.description)} — يتم حساب وجه وخلفية بنفس المقاس وقاعدة؛ التكلفة وفق سعر اللوح ونسبة الهدر.</p>`:''}</div>`);}
 // The original V3 stock getter called availableStock; final stock keeps separately physical and reserved.
 const originalRenderInventory=renderInventoryLegacy;
+function woodIsPanel(s){return /لوح/i.test(s?.unit||'')&&(itemCategory(s)==='خشب'||/أكريليك/i.test(s.category||''))}
+function boardSummaryFor(s){
+ if(!woodIsPanel(s))return null;
+ const total=n(s.qty)+stockReceived(s),w=n(s.boardWidth),h=n(s.boardHeight);
+ if(s.woodLayout)return {...LaserWood.describe(s.woodLayout),untracked:false};
+ if(stockConsumed(s)>0.000001)return {untracked:true,areaEquivalent:availableStock(s)};
+ if(!Number.isInteger(total)||w<=0||h<=0)return {untracked:true,areaEquivalent:availableStock(s)};
+ return {whole:total,partial:0,spent:0,cm2:total*w*h,sheetEquivalent:total,boardCount:total,untracked:false};
+}
 function renderInventory(){
  originalRenderInventory();
  const el=$('#stockMetrics');
- const reservedKinds=stocks().filter(v=>reservationsFor(v)>0).length;
- el.insertAdjacentHTML('beforeend',metric('أصناف عليها حجوزات',reservedKinds,'الحجوزات منفصلة عن الاستهلاك الفعلي','◷'));
+ const all=stocks(),reservedCount=all.filter(v=>reservationsFor(v)>0).length;
+ el.insertAdjacentHTML('beforeend',metric('أصناف عليها حجوزات',reservedCount,'مفصولة عن الاستهلاك الفعلي','◷'));
  const recovery=$('#cloudRecoveryNotice');if(recovery)recovery.style.display=(!cloudToken&&stocks().length===0)?'block':'none';
  const cards=$('#stockCards');if(!cards)return;
- const q=$('#stockSearch').value.toLowerCase().trim(),filter=$('#stockFilter').value;
- const all=stocks().filter(x=>(filter==='all'||isLowStock(x))&&
- [x.name,x.supplier,x.category].join(' ').toLowerCase().includes(q))
- .sort((a,b)=>Number(isLowStock(b))-Number(isLowStock(a))||a.name.localeCompare(b.name,'ar'));
- cards.innerHTML=all.map(x=>{
-  const isSheet=itemCategory(x)==='خشب'&&/لوح/i.test(x.unit||'');
-  const kind=itemCategory(x),available=availableStock(x),reserved=reservationsFor(x);
-  const promised=available-reserved,price=effectiveStockUnitCost(x);
-  const size=(n(x.boardWidth)>0&&n(x.boardHeight)>0)?' • '+n(x.boardWidth)+'×'+n(x.boardHeight)+' سم':'';
-  const amountText=isSheet?available.toFixed(2)+' لوح مساحة تقريبية':available.toFixed(2)+' '+(x.unit||'قطعة');
-  const detail=isSheet?'اللوح'+size+' • سعر اللوح '+money(price):'سعر '+esc(x.unit||'الوحدة')+' '+money(price);
-  const note=isSheet?'اللوح المقصوص محسوب كمساحة مكافئة فقط، مش خريطة فعلية للبقايا.':'السعر محسوب من أسعار الشراء المسجلة.';
-  return '<article class="stock-item-card" data-stock-card="'+esc(x.id)+'">'+
-    '<div class="stock-item-title"><div><span class="stock-item-type">'+esc(kind)+'</span><h3>'+esc(x.name)+'</h3></div>'+
-    '<span class="type-chip '+(promised<=n(x.minimum)?'bad':'good')+'">'+(promised<=n(x.minimum)?'⚠ قليل':'متوفر')+'</span></div>'+
-    '<div class="stock-item-quantity">'+esc(amountText)+'</div>'+
-    '<div class="stock-item-info">'+detail+'</div>'+
-    (reserved>0?'<div class="stock-item-info">محجوز للطلبات: '+reserved.toFixed(3)+' '+esc(x.unit||'')+' • حر للطلبات: '+Math.max(0,promised).toFixed(3)+'</div>':'')+
-    '<div class="stock-item-actions"><span class="small muted">قيمة الباقي: '+money(Math.max(0,available)*price)+'</span>'+
-    '<button type="button" class="linkbutton" data-action="edit-stock" data-id="'+esc(x.id)+'">تعديل المادة</button></div>'+
-    (isSheet?'<div class="stock-item-note">'+esc(note)+'</div>':'')+
-    '</article>';
- }).join('')||'<div class="hintbox">ما في مواد بهالتصفية بعد. أضف أول مادة وسعرها ووحدتها.</div>';
+ const query=$('#stockSearch').value.toLowerCase().trim(),filter=$('#stockFilter').value;
+ const arr=all.filter(x=>(filter==='all'||isLowStock(x))&&[x.name,x.supplier,x.category].join(' ').toLowerCase().includes(query))
+   .sort((a,b)=>Number(isLowStock(b))-Number(isLowStock(a))||a.name.localeCompare(b.name,'ar'));
+ cards.innerHTML=arr.map(x=>{
+  const sheet=woodIsPanel(x),board=sheet?boardSummaryFor(x):null,available=availableStock(x),reserved=reservationsFor(x);
+  const unit=esc(x.unit||'قطعة'),price=effectiveStockUnitCost(x);
+  const sheetInfo=board?.untracked?'<span class="stock-warning">⚠ في قصّات قديمة بلا خريطة لوح؛ يلزم جرد البقايا قبل قصّات جديدة</span>':
+    '<strong>'+board.whole+' ألواح كاملة</strong> + <strong>'+board.partial+' ألواح فيها بقايا</strong>';
+  const title=sheet?'<div class="stock-big">'+sheetInfo+'</div>':
+    '<div class="stock-big">'+available.toFixed(2)+' '+unit+'</div>';
+  const detail=sheet&&board&&!board.untracked?
+    '<div class="stock-small-grid"><span>اللوح <b>'+n(x.boardWidth)+'×'+n(x.boardHeight)+' سم</b></span>'+
+    '<span>المساحة الباقية <b>'+board.cm2.toFixed(1)+' سم²</b></span>'+
+    '<span>سعر اللوح <b>'+money(price)+'</b></span><span>شق الليزر <b>'+n(x.kerfMm)+' ملم</b></span></div>':
+    '<div class="stock-small-grid"><span>سعر الوحدة <b>'+money(price)+'</b></span>'+
+    '<span>المتوفر <b>'+available.toFixed(2)+' '+unit+'</b></span></div>';
+  const booking=reserved>0?'<p class="small muted">محجوز للطلبات: <b>'+reserved.toFixed(4)+' '+unit+'</b> • غير محجوز: '+Math.max(0,available-reserved).toFixed(4)+'</p>':'';
+  return '<article class="stock-item-card" data-stock-card="'+esc(x.id)+'"><div class="stock-item-title"><div><span class="stock-item-type">'+esc(itemCategory(x))+'</span>'+
+   '<h3>'+esc(x.name)+'</h3></div><span class="type-chip '+(available-reserved<=n(x.minimum)?'bad':'good')+'">'+
+   (available-reserved<=n(x.minimum)?'⚠ قرب يخلص':'متوفر')+'</span></div>'+
+   title+detail+booking+
+   '<div class="stock-item-actions"><span class="small muted">قيمة متبقية تقديرية: '+money(Math.max(0,available)*price)+'</span>'+
+   (sheet?'<button class="linkbutton" data-action="board-details" data-id="'+esc(x.id)+'">تفاصيل الألواح والقصّات</button>':'')+
+   '<button class="linkbutton" data-action="edit-stock" data-id="'+esc(x.id)+'">تعديل / توريد</button></div>'+
+   (sheet?'<p class="stock-item-note">البرنامج يتتبّع القصّات المستطيلة وبقاياها؛ أشكال SVG غير المنتظمة ليست موزّعة تلقائياً.</p>':'')+
+   '</article>';
+ }).join('')||'<div class="hintbox">المخزون فارغ بهيدي النسخة. استخدم «مادة جديدة» لسجل ألواحك والتغليف؛ بيانات تطبيق Flutter التجريبي منفصلة ولا تنتقل تلقائياً.</div>';
 }
+function openBoardDetails(id){
+ const x=stocks().find(v=>v.id===id);if(!x)return;
+ const summary=boardSummaryFor(x),layout=x.woodLayout;
+ const dialog=document.createElement('dialog');dialog.className='wood-board-dialog';
+ let body='<h2>'+esc(x.name)+'</h2>';
+ if(summary.untracked)body+='<div class="hintbox">⚠ في استعمال قديم للخشب بلا قياسات قص موثقة. ما رح نفترض وين بقي الخشب. يلزم جرد البقايا أولاً.</div>';
+ else if(!layout)body+='<p class="hint">ما تم تسجيل قصّات بعد. عدد الألواح الكاملة: '+summary.whole+'.</p>';
+ else{
+  body+='<p>الألواح الكاملة: '+summary.whole+' • فيها قصّات: '+summary.partial+' • المساحة المتبقية: '+summary.cm2.toFixed(1)+' سم²</p>';
+  body+='<div class="wood-board-grid">'+layout.boards.slice(0,60).map((b,i)=>{
+   const remaining=(b.free||[]).reduce((t,r)=>t+r.w*r.h,0);
+   const rects=b.cuts.map(c=>'<rect x="'+c.x+'" y="'+c.y+'" width="'+c.w+'" height="'+c.h+'" fill="#b38c4d" stroke="#55401d" stroke-width="0.6"><title>'+esc(c.label||'قصّة')+'</title></rect>').join('');
+   const free=(b.free||[]).map(r=>'<rect x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" fill="#c0dec9" stroke="#52886b" stroke-width=".4"/>').join('');
+   return '<div class="wood-board"><strong>لوح '+(i+1)+'</strong><span class="small muted">باقي '+remaining.toFixed(1)+' سم²</span>'+
+     '<svg viewBox="0 0 '+layout.widthCm+' '+layout.heightCm+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="خريطة قصّات اللوح">'+
+     '<rect width="'+layout.widthCm+'" height="'+layout.heightCm+'" fill="#e2e6e4"/>'+free+rects+'</svg>'+
+     '<p class="small muted">'+b.cuts.length+' قصّات • '+(b.free||[]).length+' مناطق متبقية</p></div>'
+  }).join('')+'</div>';
+  if(layout.boards.length>60)body+='<p class="small">تم عرض أول 60 لوحاً فقط.</p>';
+ }
+ dialog.innerHTML='<div class="modalhead"><h2>خريطة بقايا الخشب</h2><button class="x" type="button" data-close-board>×</button></div>'+
+   '<div class="modalbody">'+body+'</div><div class="modalfooter"><button class="button" type="button" data-close-board>إغلاق</button></div>';
+ document.body.append(dialog);dialog.showModal();
+ dialog.addEventListener('click',e=>{if(e.target.closest('[data-close-board]'))dialog.close()});
+ dialog.addEventListener('close',()=>dialog.remove());
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-action="board-details"]');if(b)openBoardDetails(b.dataset.id);
+});
 // Historical snapshots are never changed by later materials-price edits.
+function woodStockForUsage(u){const stock=stocks().find(s=>s.id===u.stockId);if(!stock)throw Error('المادة المرتبطة بالطلب مش موجودة');return stock}
+function plannedCutsForUsage(o,u){
+ if(u.autoWood)return LaserWood.cutsForPortrait(portraitQuoteForOrder(o),n(o.qty));
+ if(Array.isArray(u.cutPieces)&&u.cutPieces.length){
+  const pieces=[];for(const p of u.cutPieces)for(let i=0;i<n(p.count);i++)pieces.push({label:p.label||'قصّة خشب',w:n(p.w),h:n(p.h)});
+  return pieces;
+ }
+ throw Error('قصّة خشب بلا عرض وطول: '+u.stockName+'. افتح الطلب وأضف قياسات القصّات قبل الخصم.');
+}
+function simulateOrderWood(o,awaiting){
+ const drafts=new Map(),changes=new Map();
+ for(const u of awaiting){
+  const stock=woodStockForUsage(u),sheet=itemCategory(stock)==='خشب'&&/لوح/i.test(stock.unit||'');
+  if(!sheet)continue;
+  const total=n(stock.qty)+stockReceived(stock),layout=drafts.has(stock.id)?drafts.get(stock.id):
+   LaserWood.ensure(stock.woodLayout,total,n(stock.boardWidth),n(stock.boardHeight),stockConsumed(stock));
+  const pieces=plannedCutsForUsage(o,u);
+  const next=LaserWood.plan(layout,pieces,n(stock.kerfMm)||0,o.id);
+  drafts.set(stock.id,next.layout);changes.set(u.id,next.placements);
+ }
+ return {drafts,changes};
+}
 function markOrderConsumed(id){
  const o=getOrder(id);if(!o)return;
- if(o.status==='ملغى')return alert('ما فيك تخصم مواد طلب ملغي. أعد فتح الطلب وغيّر حالته أولاً.');
+ if(o.status==='ملغى')return alert('ما فيك تخصم مواد طلب ملغي.');
  const awaiting=orderUses(o).filter(u=>u.state==='reserved');
+ if(!awaiting.length)return toast('استهلاك المواد مؤكد سابقاً، وما رح ينخصم مرتين.');
  const need=new Map();
  for(const u of awaiting)need.set(u.stockId,(need.get(u.stockId)||0)+n(u.qty));
- const missing=[];
- for(const [sid,qty]of need){
-  const stock=stocks().find(s=>s.id===sid);
-  if(!stock){missing.push('مادة انحذفت من المخزون');continue}
-  if(availableStock(stock)+1e-8<qty)missing.push(stock.name+' (المتاح '+availableStock(stock).toFixed(3)+', المطلوب '+qty.toFixed(3)+')');
+ const errors=[];
+ for(const [sid,qty]of need){const st=stocks().find(x=>x.id===sid);
+  if(!st)errors.push('مادة غير موجودة');
+  else if(availableStock(st)+1e-6<qty)errors.push(st.name+': المتاح '+availableStock(st).toFixed(3)+'، المطلوب '+qty.toFixed(3));
  }
- if(missing.length)return alert('ما خصمنا شي حتى ما يصير رصيد سالب. راجع المواد:\n'+missing.join('\n'));
- const original=awaiting.map(u=>({u,state:u.state,updatedAt:u.updatedAt}));
- for(const u of awaiting){u.state='consumed';touch(u)}
- if(awaiting.length){
-  if(!save()){for(const snap of original){snap.u.state=snap.state;snap.u.updatedAt=snap.updatedAt}return alert('تعذّر حفظ الاستهلاك، ما ثبتنا أي خصم. اعمل نسخة احتياطية وجرب بعد التأكد من التخزين.')}
-  render();toast('تم تأكيد الاستهلاك مرة واحدة ✓')
- }else toast('المواد مسجلة كمستهلكة بالفعل أو ما في حجوزات');
+ if(errors.length)return alert('ما خصمنا شي:\n'+errors.join('\n'));
+ let plan;
+ try{plan=simulateOrderWood(o,awaiting)}
+ catch(e){return alert('ما خصمنا شي من الخشب:\n'+e.message)}
+ const snapshots=awaiting.map(u=>({u,state:u.state,updatedAt:u.updatedAt,placements:u.woodPlacements}));
+ const oldMaterials=[...plan.drafts.keys()].map(sid=>{const stock=stocks().find(x=>x.id===sid);return {stock,layout:stock.woodLayout,updatedAt:stock.updatedAt}});
+ if(!confirm('تأكيد استهلاك مواد هيدا الطلب؟ بيتم تسجيل القصّات بالبقايا مرة واحدة فقط.'))return;
+ for(const {stock}of oldMaterials){stock.woodLayout=plan.drafts.get(stock.id);touch(stock)}
+ for(const u of awaiting){u.state='consumed';if(plan.changes.has(u.id))u.woodPlacements=plan.changes.get(u.id);touch(u)}
+ if(!save()){
+  for(const snap of snapshots){snap.u.state=snap.state;snap.u.updatedAt=snap.updatedAt;snap.u.woodPlacements=snap.placements}
+  for(const snap of oldMaterials){snap.stock.woodLayout=snap.layout;snap.stock.updatedAt=snap.updatedAt}
+  return alert('تعذّر حفظ القصّات، رجّعنا البيانات بدون خصم. جرّب بعد عمل نسخة احتياطية.')
+ }
+ render();toast('تم تسجيل قصّات الخشب وخصم المواد مرة واحدة ✓');
 }
-function forceFinalCost(id){let o=getOrder(id);if(!o)return;if(o.status!=='تم التسليم')return alert('ثبّت تكلفة الطلب بعد وضع حالته «تم التسليم».');if(o.finalSnapshot&&!confirm('هيدا الطلب إله تكلفة مثبتة. بدك تعيد حسابها من السجلات الحالية؟'))return;for(const u of orderUses(o)){if(u.state==='reserved'){u.state='consumed';touch(u)}}o.finalSnapshot=null;finalizeOrderCost(o);save();render();toast('تم تثبيت التكلفة النهائية ✓')}
+function forceFinalCost(id){
+ let o=getOrder(id);if(!o)return;
+ if(o.status!=='تم التسليم')return alert('ثبّت تكلفة الطلب بعد تغيير حالته إلى «تم التسليم».');
+ if(o.finalSnapshot&&!confirm('بدك تحدث كلفة المواد المباشرة المثبّتة لهيدا الطلب؟'))return;
+ o.finalSnapshot=null;finalizeOrderCost(o);save();render();toast('تم تثبيت التكلفة المباشرة ✓ — خصم المخزون بيتم بزر الاستهلاك فقط');
+}
 document.addEventListener('click',e=>{
- const action=e.target.closest('[data-action="recover-cloud"]');
- if(!action)return;
+ const b=e.target.closest('[data-action="recover-cloud"]');
+ if(!b)return;
  e.preventDefault();
  changePage('settings');
  const email=$('#cloudEmail');
@@ -900,11 +1067,14 @@ function portraitWoodQuote(p,kind,w,h,qty=1,parts=null){
  const used=[['الواجهة',width,height]],extras=[['الخلفية','hasBackground','backgroundWidthCm','backgroundHeightCm'],['القاعدة','hasBase','baseWidthCm','baseHeightCm'],['الستاند','hasStand','standWidthCm','standHeightCm']];
  for(const [label,flag,wKey,hKey]of extras)if(cfg[flag])used.push([label,n(cfg[wKey]),n(cfg[hKey])]);
  const area=used.reduce((t,x)=>t+Math.max(0,x[1])*Math.max(0,x[2]),0),valid=width>0&&height>0&&used.every(x=>x[1]>0&&x[2]>0);
- const fraction=valid&&boardWidth>0&&boardHeight>0?area/(boardWidth*boardHeight)*(1+n(s.wastePct)/100):0;
+ const kerf=(n(stock?.kerfMm)||0)/10;
+ const physicalArea=used.reduce((t,x)=>t+(x[1]+kerf)*(x[2]+kerf),0);
+ const physicalFraction=valid&&boardWidth>0&&boardHeight>0?physicalArea/(boardWidth*boardHeight):0;
+ const fraction=physicalFraction*(1+n(s.wastePct)/100);
  const price=stock?effectiveStockUnitCost(stock):(kind==='طبيعي'?n(s.woodPrice):0),known=fraction>0&&price>0&&valid;
  let description=used.map(x=>x[0]+' '+x[1]+'×'+x[2]+' سم').join(' + ')+' + هدر '+n(s.wastePct)+'% = '+(fraction*qty).toFixed(4)+' لوح '+boardWidth+'×'+boardHeight+' سم، خشب '+kind;
  if(!known)description+=' — ⚠ قياسات أو سعر الخشب غير مكتمل';
- return {known,width,height,unitCost:known?fraction*price:0,qty:fraction*qty,unitFraction:fraction,stock,description,used};
+ return {known,width,height,unitCost:known?fraction*price:0,qty:physicalFraction*qty,unitFraction:physicalFraction,stock,description,used};
 }
 function portraitQuoteFromEditor(){
  const p=getProduct($('#f_productId')?.value);
@@ -925,8 +1095,8 @@ function syncAutoPortraitWood(o){const p=getProduct(o.productId),prior=orderUses
  // One calculated sheet fraction for the FRONT + same-size BACK + small stand; never add wood twice.
  let u=prior[0];for(const extra of prior.slice(1)){extra.deleted=true;touch(extra)}
  if(!u){u={id:uuid(),orderId:o.id,createdAt:stamp(),deleted:false,autoWood:true};db.usages.push(u)}
- const previousKind=u.stockId===quote.stock.id&&n(u.costPerUnit)>0?u.costPerUnit:effectiveStockUnitCost(quote.stock);
- Object.assign(u,{stockId:quote.stock.id,stockName:quote.stock.name,role:'خشب',qty:Number(quote.qty.toFixed(6)),perUnit:quote.unitFraction,costPerUnit:previousKind,autoWood:true,state:o.status==='ملغى'?'released':o.status==='تم التسليم'?'consumed':'reserved',note:quote.description});touch(u);o.useWoodFromStock=true;touch(o);
+ const previousKind=u.stockId===quote.stock.id&&n(u.costPerUnit)>0&&u.state==='consumed'?u.costPerUnit:effectiveStockUnitCost(quote.stock)*(1+n(db.settings.wastePct)/100);
+ Object.assign(u,{stockId:quote.stock.id,stockName:quote.stock.name,role:'خشب',qty:Number(quote.qty.toFixed(6)),perUnit:quote.unitFraction,costPerUnit:previousKind,autoWood:true,state:o.status==='ملغى'?'released':u.state==='consumed'?'consumed':'reserved',note:quote.description});touch(u);o.useWoodFromStock=true;touch(o);
 }
 // A time valuation, not a factual hourly wage. Preserve user-set rates, including explicit zero.
 if(!db.settings.hourlyRateChosen&&!(n(db.settings.hourlyRate)>0)){db.settings.hourlyRate=2;db.settings.hourlyRateChosen=true;db.settings.updatedAt=stamp();try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
