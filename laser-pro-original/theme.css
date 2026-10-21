@@ -89,3 +89,16 @@ html[data-ui-theme="dark"] .row-profit-positive,html[data-ui-theme="dark"] .gree
 html[data-ui-theme="dark"] .row-profit-negative,html[data-ui-theme="dark"] .red-text{color:#ff9a9e}
 html[data-ui-theme="dark"] .q-icon,html[data-ui-theme="dark"] .studio-folder .folder-icon{color:var(--gold)}
 @media(max-width:750px){.topbar{align-items:flex-start}.theme-shortcut{padding:7px 9px}}
+
+/* Compact, phone-first inventory overview. Desktop keeps the editable detail table. */
+.stock-card-grid{display:none;gap:12px;margin:12px 0 15px}
+.stock-item-card{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.stock-item-title{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.stock-item-title h3{font-size:17px;margin:5px 0 0;line-height:1.5;color:var(--ink)}
+.stock-item-type{font-size:11px;font-weight:800;color:var(--muted)}
+.stock-item-quantity{font-size:21px;font-weight:850;color:var(--ink);margin:12px 0 6px;font-variant-numeric:tabular-nums}
+.stock-item-info{font-size:13px;line-height:1.85;color:var(--muted)}
+.stock-item-actions{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
+.stock-item-note{font-size:11px;color:var(--muted);line-height:1.7;margin-top:10px}
+html[data-ui-theme="dark"] .stock-item-card{background:var(--surface);border-color:var(--line)}
+@media(max-width:850px){.stock-card-grid{display:grid;grid-template-columns:minmax(0,1fr)}.stock-classic-table{display:none}}
