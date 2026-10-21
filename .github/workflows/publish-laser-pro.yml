@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'laser-pro-studio/**'
+      - 'laser-pro-daily/**'
       - 'laser-pro-original/**'
       - '.github/workflows/publish-laser-pro.yml'
   workflow_dispatch:
@@ -25,12 +26,15 @@ jobs:
       - name: Prepare isolated site
         shell: bash
         run: |
+          mkdir -p _site/laser-pro-daily
+          cp laser-pro-daily/index.html _site/laser-pro-daily/index.html
           mkdir -p _site/laser-pro-studio
           cp laser-pro-studio/index.html _site/laser-pro-studio/index.html
           mkdir -p _site/laser-pro-original
           cp laser-pro-original/index.html laser-pro-original/theme.css laser-pro-original/wood-ui.css laser-pro-original/wood-layout.js laser-pro-original/sw.js laser-pro-original/manifest.webmanifest laser-pro-original/icon-192.png _site/laser-pro-original/
-          node -e "const fs=require('fs'); for(const f of ['laser-pro-studio/index.html','laser-pro-original/index.html']){let s=fs.readFileSync(f,'utf8'); const js=s.match(/<script>([\\s\\S]*?)<\\/script>/); if(!js)throw Error('Script not found: '+f);new Function(js[1]);}"
+          node -e "const fs=require('fs'); for(const f of ['laser-pro-daily/index.html','laser-pro-studio/index.html','laser-pro-original/index.html']){let s=fs.readFileSync(f,'utf8'); const js=s.match(/<script>([\\s\\S]*?)<\\/script>/); if(!js)throw Error('Script not found: '+f);new Function(js[1]);}"
           touch _site/.nojekyll
+          test -s _site/laser-pro-daily/index.html
           test -s _site/laser-pro-studio/index.html
           test -s _site/laser-pro-original/index.html
           test -s _site/laser-pro-original/theme.css
