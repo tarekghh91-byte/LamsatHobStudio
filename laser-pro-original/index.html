@@ -856,36 +856,78 @@ const originalRenderCostDetails=renderCostDetailsLegacy;
 function renderCostDetails(){originalRenderCostDetails();let o=orderOfCosting();if(!o)return;const el=$('#costSummary'),e=estimateCost(o);el.insertAdjacentHTML('afterbegin',`<div class="hintbox"><b>الربح المتوقع قبل الإنجاز: ${money(e.profit)}</b> · التكلفة المتوقعة ${money(e.total)} · وقت باقي مقدّر ${money(e.expectedLabor)}. <span class="muted">الربح الفعلي بيتثبت بعد إنهاء التصنيع وتسجيل المواد وساعات العمل. ${o.finalSnapshot?(o.finalSnapshot.complete?'طلب مكتمل بتكلفته المسجلة.':'الطلب مسلّم لكن ساعات العمل أو بعض تكاليفه غير مؤكدة؛ سجّلها ثم ثبّت التكلفة من جديد.'):''}</span></div>`);const packing=orderUses(o).filter(u=>u.role==='تغليف'&&u.state!=='released');const note=portraitQuoteForOrder(o);if(isPortraitProduct(getProduct(o.productId))&&!o.costKnown&&!woodActual(o)){el.insertAdjacentHTML('afterbegin','<div class="notice">⚠ سعر الخشب غير مسجّل. الربح المعروض تقديري ناقص كلفة الخشب، ولا يُعتبر ربحاً نهائياً.</div>');}el.insertAdjacentHTML('beforeend',`<div class="hintbox"><b>تفصيل مواد التغليف المختارة:</b>${packing.length?packing.map(u=>`<div class="summaryline"><span>${esc(u.stockName)} × ${n(u.qty)} ${esc(stocks().find(s=>s.id===u.stockId)?.unit||'قطعة')}</span><b>${money(n(u.qty)*n(u.costPerUnit))}</b></div>`).join(''):'<p>لا توجد مواد تغليف لهذا الطلب بعد.</p>'}${isPortraitProduct(getProduct(o.productId))?`<p class="small">حساب الخشب: ${esc(note.description)} — يتم حساب وجه وخلفية بنفس المقاس وقاعدة؛ التكلفة وفق سعر اللوح ونسبة الهدر.</p>`:''}</div>`);}
 // The original V3 stock getter called availableStock; final stock keeps separately physical and reserved.
 const originalRenderInventory=renderInventoryLegacy;
+function woodIsPanel(s){return /لوح/i.test(s?.unit||'')&&(itemCategory(s)==='خشب'||/أكريليك/i.test(s.category||''))}
+function boardSummaryFor(s){
+ if(!woodIsPanel(s))return null;
+ const total=n(s.qty)+stockReceived(s),w=n(s.boardWidth),h=n(s.boardHeight);
+ if(s.woodLayout)return {...LaserWood.describe(s.woodLayout),untracked:false};
+ if(stockConsumed(s)>0.000001)return {untracked:true,areaEquivalent:availableStock(s)};
+ if(!Number.isInteger(total)||w<=0||h<=0)return {untracked:true,areaEquivalent:availableStock(s)};
+ return {whole:total,partial:0,spent:0,cm2:total*w*h,sheetEquivalent:total,boardCount:total,untracked:false};
+}
 function renderInventory(){
  originalRenderInventory();
  const el=$('#stockMetrics');
- const reservedKinds=stocks().filter(v=>reservationsFor(v)>0).length;
- el.insertAdjacentHTML('beforeend',metric('أصناف عليها حجوزات',reservedKinds,'الحجوزات منفصلة عن الاستهلاك الفعلي','◷'));
+ const all=stocks(),reservedCount=all.filter(v=>reservationsFor(v)>0).length;
+ el.insertAdjacentHTML('beforeend',metric('أصناف عليها حجوزات',reservedCount,'مفصولة عن الاستهلاك الفعلي','◷'));
  const cards=$('#stockCards');if(!cards)return;
- const q=$('#stockSearch').value.toLowerCase().trim(),filter=$('#stockFilter').value;
- const all=stocks().filter(x=>(filter==='all'||isLowStock(x))&&
- [x.name,x.supplier,x.category].join(' ').toLowerCase().includes(q))
- .sort((a,b)=>Number(isLowStock(b))-Number(isLowStock(a))||a.name.localeCompare(b.name,'ar'));
- cards.innerHTML=all.map(x=>{
-  const isSheet=itemCategory(x)==='خشب'&&/لوح/i.test(x.unit||'');
-  const kind=itemCategory(x),available=availableStock(x),reserved=reservationsFor(x);
-  const promised=available-reserved,price=effectiveStockUnitCost(x);
-  const size=(n(x.boardWidth)>0&&n(x.boardHeight)>0)?' • '+n(x.boardWidth)+'×'+n(x.boardHeight)+' سم':'';
-  const amountText=isSheet?available.toFixed(2)+' لوح مساحة تقريبية':available.toFixed(2)+' '+(x.unit||'قطعة');
-  const detail=isSheet?'اللوح'+size+' • سعر اللوح '+money(price):'سعر '+esc(x.unit||'الوحدة')+' '+money(price);
-  const note=isSheet?'اللوح المقصوص محسوب كمساحة مكافئة فقط، مش خريطة فعلية للبقايا.':'السعر محسوب من أسعار الشراء المسجلة.';
-  return '<article class="stock-item-card" data-stock-card="'+esc(x.id)+'">'+
-    '<div class="stock-item-title"><div><span class="stock-item-type">'+esc(kind)+'</span><h3>'+esc(x.name)+'</h3></div>'+
-    '<span class="type-chip '+(promised<=n(x.minimum)?'bad':'good')+'">'+(promised<=n(x.minimum)?'⚠ قليل':'متوفر')+'</span></div>'+
-    '<div class="stock-item-quantity">'+esc(amountText)+'</div>'+
-    '<div class="stock-item-info">'+detail+'</div>'+
-    (reserved>0?'<div class="stock-item-info">محجوز للطلبات: '+reserved.toFixed(3)+' '+esc(x.unit||'')+' • حر للطلبات: '+Math.max(0,promised).toFixed(3)+'</div>':'')+
-    '<div class="stock-item-actions"><span class="small muted">قيمة الباقي: '+money(Math.max(0,available)*price)+'</span>'+
-    '<button type="button" class="linkbutton" data-action="edit-stock" data-id="'+esc(x.id)+'">تعديل المادة</button></div>'+
-    (isSheet?'<div class="stock-item-note">'+esc(note)+'</div>':'')+
-    '</article>';
- }).join('')||'<div class="hintbox">ما في مواد بهالتصفية بعد. أضف أول مادة وسعرها ووحدتها.</div>';
+ const query=$('#stockSearch').value.toLowerCase().trim(),filter=$('#stockFilter').value;
+ const arr=all.filter(x=>(filter==='all'||isLowStock(x))&&[x.name,x.supplier,x.category].join(' ').toLowerCase().includes(query))
+   .sort((a,b)=>Number(isLowStock(b))-Number(isLowStock(a))||a.name.localeCompare(b.name,'ar'));
+ cards.innerHTML=arr.map(x=>{
+  const sheet=woodIsPanel(x),board=sheet?boardSummaryFor(x):null,available=availableStock(x),reserved=reservationsFor(x);
+  const unit=esc(x.unit||'قطعة'),price=effectiveStockUnitCost(x);
+  const sheetInfo=board?.untracked?'<span class="stock-warning">⚠ في قصّات قديمة بلا خريطة لوح؛ يلزم جرد البقايا قبل قصّات جديدة</span>':
+    '<strong>'+board.whole+' ألواح كاملة</strong> + <strong>'+board.partial+' ألواح فيها بقايا</strong>';
+  const title=sheet?'<div class="stock-big">'+sheetInfo+'</div>':
+    '<div class="stock-big">'+available.toFixed(2)+' '+unit+'</div>';
+  const detail=sheet&&board&&!board.untracked?
+    '<div class="stock-small-grid"><span>اللوح <b>'+n(x.boardWidth)+'×'+n(x.boardHeight)+' سم</b></span>'+
+    '<span>المساحة الباقية <b>'+board.cm2.toFixed(1)+' سم²</b></span>'+
+    '<span>سعر اللوح <b>'+money(price)+'</b></span><span>شق الليزر <b>'+n(x.kerfMm)+' ملم</b></span></div>':
+    '<div class="stock-small-grid"><span>سعر الوحدة <b>'+money(price)+'</b></span>'+
+    '<span>المتوفر <b>'+available.toFixed(2)+' '+unit+'</b></span></div>';
+  const booking=reserved>0?'<p class="small muted">محجوز للطلبات: <b>'+reserved.toFixed(4)+' '+unit+'</b> • غير محجوز: '+Math.max(0,available-reserved).toFixed(4)+'</p>':'';
+  return '<article class="stock-item-card"><div class="stock-item-title"><div><span class="stock-item-type">'+esc(itemCategory(x))+'</span>'+
+   '<h3>'+esc(x.name)+'</h3></div><span class="type-chip '+(available-reserved<=n(x.minimum)?'bad':'good')+'">'+
+   (available-reserved<=n(x.minimum)?'⚠ قرب يخلص':'متوفر')+'</span></div>'+
+   title+detail+booking+
+   '<div class="stock-item-actions"><span class="small muted">قيمة متبقية تقديرية: '+money(Math.max(0,available)*price)+'</span>'+
+   (sheet?'<button class="linkbutton" data-action="board-details" data-id="'+esc(x.id)+'">تفاصيل الألواح والقصّات</button>':'')+
+   '<button class="linkbutton" data-action="edit-stock" data-id="'+esc(x.id)+'">تعديل / توريد</button></div>'+
+   (sheet?'<p class="stock-item-note">البرنامج يتتبّع القصّات المستطيلة وبقاياها؛ أشكال SVG غير المنتظمة ليست موزّعة تلقائياً.</p>':'')+
+   '</article>';
+ }).join('')||'<div class="hintbox">المخزون فارغ بهيدي النسخة. استخدم «مادة جديدة» لسجل ألواحك والتغليف؛ بيانات تطبيق Flutter التجريبي منفصلة ولا تنتقل تلقائياً.</div>';
 }
+function openBoardDetails(id){
+ const x=stocks().find(v=>v.id===id);if(!x)return;
+ const summary=boardSummaryFor(x),layout=x.woodLayout;
+ const dialog=document.createElement('dialog');dialog.className='wood-board-dialog';
+ let body='<h2>'+esc(x.name)+'</h2>';
+ if(summary.untracked)body+='<div class="hintbox">⚠ في استعمال قديم للخشب بلا قياسات قص موثقة. ما رح نفترض وين بقي الخشب. يلزم جرد البقايا أولاً.</div>';
+ else if(!layout)body+='<p class="hint">ما تم تسجيل قصّات بعد. عدد الألواح الكاملة: '+summary.whole+'.</p>';
+ else{
+  body+='<p>الألواح الكاملة: '+summary.whole+' • فيها قصّات: '+summary.partial+' • المساحة المتبقية: '+summary.cm2.toFixed(1)+' سم²</p>';
+  body+='<div class="wood-board-grid">'+layout.boards.slice(0,60).map((b,i)=>{
+   const remaining=(b.free||[]).reduce((t,r)=>t+r.w*r.h,0);
+   const rects=b.cuts.map(c=>'<rect x="'+c.x+'" y="'+c.y+'" width="'+c.w+'" height="'+c.h+'" fill="#b38c4d" stroke="#55401d" stroke-width="0.6"><title>'+esc(c.label||'قصّة')+'</title></rect>').join('');
+   const free=(b.free||[]).map(r=>'<rect x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" fill="#c0dec9" stroke="#52886b" stroke-width=".4"/>').join('');
+   return '<div class="wood-board"><strong>لوح '+(i+1)+'</strong><span class="small muted">باقي '+remaining.toFixed(1)+' سم²</span>'+
+     '<svg viewBox="0 0 '+layout.widthCm+' '+layout.heightCm+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="خريطة قصّات اللوح">'+
+     '<rect width="'+layout.widthCm+'" height="'+layout.heightCm+'" fill="#e2e6e4"/>'+free+rects+'</svg>'+
+     '<p class="small muted">'+b.cuts.length+' قصّات • '+(b.free||[]).length+' مناطق متبقية</p></div>'
+  }).join('')+'</div>';
+  if(layout.boards.length>60)body+='<p class="small">تم عرض أول 60 لوحاً فقط.</p>';
+ }
+ dialog.innerHTML='<div class="modalhead"><h2>خريطة بقايا الخشب</h2><button class="x" type="button" data-close-board>×</button></div>'+
+   '<div class="modalbody">'+body+'</div><div class="modalfooter"><button class="button" type="button" data-close-board>إغلاق</button></div>';
+ document.body.append(dialog);dialog.showModal();
+ dialog.addEventListener('click',e=>{if(e.target.closest('[data-close-board]'))dialog.close()});
+ dialog.addEventListener('close',()=>dialog.remove());
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-action="board-details"]');if(b)openBoardDetails(b.dataset.id);
+});
 // Historical snapshots are never changed by later materials-price edits.
 function woodStockForUsage(u){const stock=stocks().find(s=>s.id===u.stockId);if(!stock)throw Error('المادة المرتبطة بالطلب مش موجودة');return stock}
 function plannedCutsForUsage(o,u){
