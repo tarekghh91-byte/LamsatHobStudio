@@ -889,7 +889,7 @@ function renderInventory(){
     '<div class="stock-small-grid"><span>سعر الوحدة <b>'+money(price)+'</b></span>'+
     '<span>المتوفر <b>'+available.toFixed(2)+' '+unit+'</b></span></div>';
   const booking=reserved>0?'<p class="small muted">محجوز للطلبات: <b>'+reserved.toFixed(4)+' '+unit+'</b> • غير محجوز: '+Math.max(0,available-reserved).toFixed(4)+'</p>':'';
-  return '<article class="stock-item-card"><div class="stock-item-title"><div><span class="stock-item-type">'+esc(itemCategory(x))+'</span>'+
+  return '<article class="stock-item-card" data-stock-card="'+esc(x.id)+'"><div class="stock-item-title"><div><span class="stock-item-type">'+esc(itemCategory(x))+'</span>'+
    '<h3>'+esc(x.name)+'</h3></div><span class="type-chip '+(available-reserved<=n(x.minimum)?'bad':'good')+'">'+
    (available-reserved<=n(x.minimum)?'⚠ قرب يخلص':'متوفر')+'</span></div>'+
    title+detail+booking+
